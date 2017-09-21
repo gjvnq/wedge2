@@ -29,12 +29,33 @@
 
 (deftest test-balances-2
 	(let [
-		input  [{:account "A" :date (t/local-date 2017 1 2) :value 3/4}]
-		output {"A" [{:date (t/local-date 2017 1 2) :value 3/4}]}]
+		input  [
+			{:account "A" :date (t/local-date 2017 1 2) :value 3/4}]
+		output {
+			["A" nil] [{:date (t/local-date 2017 1 2) :value 3/4}]}]
     (is (= output (balances input)))))
 
 (deftest test-balances-3
 	(let [
-		input  [{:account "A" :date (t/local-date 2017 1 2) :value 3/4} {:account "B" :date (t/local-date 2017 3 2) :value 20} {:account "B" :date (t/local-date 2014 9 2) :value -1/4}]
-		output {"A" [{:date (t/local-date 2017 1 2) :value 3/4}] "B" [{:date (t/local-date 2014 9 2) :value -1/4} {:date (t/local-date 2017 3 2) :value 79/4}]}]
+		input  [
+			{:account "A" :date (t/local-date 2017 1 2) :value 3/4}
+			{:account "B" :date (t/local-date 2017 3 2) :value 20}
+			{:account "B" :date (t/local-date 2014 9 2) :value -1/4}]
+		output {
+			["A" nil] [{:date (t/local-date 2017 1 2) :value 3/4}]
+			["B" nil] [{:date (t/local-date 2014 9 2) :value -1/4} {:date (t/local-date 2017 3 2) :value 79/4}]}]
+    	(is (= output (balances input)))))
+
+(deftest test-balances-4
+	(let [
+		input  [
+			{:account "A" :asset "BRL" :date (t/local-date 2017 1 2) :value 3/4}
+			{:account "A" :asset "BRL" :date (t/local-date 2017 1 2) :value -1/4}
+			{:account "A" :asset "USD" :date (t/local-date 2017 1 2) :value 314/100}
+			{:account "B" :asset "BRL" :date (t/local-date 2017 3 2) :value 20}
+			{:account "B" :asset "BRL" :date (t/local-date 2014 9 2) :value -1/4}]
+		output {
+			["A" "BRL"] [{:date (t/local-date 2017 1 2) :value 2/4}]
+			["A" "USD"] [{:date (t/local-date 2017 1 2) :value 314/100}]
+			["B" "BRL"] [{:date (t/local-date 2014 9 2) :value -1/4} {:date (t/local-date 2017 3 2) :value 79/4}]}]
     	(is (= output (balances input)))))

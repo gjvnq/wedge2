@@ -21,6 +21,7 @@
 (def sample-movement {
 	:id	#uuid "00000000-0000-0000-0000-000000000000"
 	:account "bank/my_generic_bank"
+	:asset "BRL"
 	:value (rationalize -10.27)
 	:status	status-default
 	:date (t/local-date 2013 3 20)
@@ -68,7 +69,7 @@
 	(sort #(t/before? (:date %1) (:date %2)) movements))
 
 (defn balances
-	"Given a non-sorted list of movements, returns a map where each key is an account name and the values are vectors of maps ({:val ... :date ...}) indicating the balance of that account at that time."
+	"Given a non-sorted list of movements ({:value ... :asset ... :date ...}), returns a map where each key is the pair account-asset and the values are vectors of maps ({:val ... :date ...}) indicating the balance of that account at that time."
 	[movements]
 	(loop [sorted (sort-movements movements) ret {}]
 		(if (empty? sorted)
@@ -77,9 +78,14 @@
 				movement (first sorted)
 				mov-date (:date movement)
 				mov-val (:value movement 0)
-				account (:account movement)
-				history (get ret account [])
+				k [(:account movement) (:asset movement)]
+				history (get ret k [])
+				last-date (:date (last history) 0)
 				last-val (:value (last history) 0)]
-				(recur
-					(rest sorted)
-					(assoc ret account (conj history {:date mov-date :value (+ last-val mov-val)})))))))
+				(if (= last-date mov-date)
+					(recur
+						(rest sorted)
+						(assoc ret k (conj (pop history) {:date mov-date :value (+ last-val mov-val)})))
+					(recur
+						(rest sorted)
+						(assoc ret k (conj history {:date mov-date :value (+ last-val mov-val)}))))))))

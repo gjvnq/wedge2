@@ -63,12 +63,10 @@
 	(reduce +
 		(map :value (before date movements))))
 
-(defn sort-movements [movements] []])
-
 (defn balances
 	"Given a non-sorted list of movements, returns a map where each key is an account name and the values are vectors of maps ({:val ... :date ...}) indicating the balance of that account at that time."
 	[movements]
-	(loop [sorted (sort-movements movements) ret {}]
+	(loop [sorted (sort #(t/before (:date %1) (:date %2)) movements) ret {}]
 		(if (empty? sorted)
 			ret
 			(let [

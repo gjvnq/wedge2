@@ -5,7 +5,7 @@
 		[clj-time.core :as t]))
 
 (load "basic")
-(load "auto_rates")
+(load "rates")
 
 (defn -main
 	"I don't do a whole lot ... yet."

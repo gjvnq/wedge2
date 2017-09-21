@@ -61,21 +61,25 @@
 	"Calculates the balance of an account at a given local date considering all movements given until the given date."
 	[account-name movements date]
 	(reduce +
-		(map :value (before date movements))))
+		(map :value (t/before? date movements))))
+
+(defn sort-movements [movements]
+	"Given a list of movements, returns a new list sorting them from the oldest to the newest."
+	(sort #(t/before? (:date %1) (:date %2)) movements))
 
 (defn balances
 	"Given a non-sorted list of movements, returns a map where each key is an account name and the values are vectors of maps ({:val ... :date ...}) indicating the balance of that account at that time."
 	[movements]
-	(loop [sorted (sort #(t/before (:date %1) (:date %2)) movements) ret {}]
+	(loop [sorted (sort-movements movements) ret {}]
 		(if (empty? sorted)
 			ret
 			(let [
 				movement (first sorted)
 				mov-date (:date movement)
-				mov-val (:value movement)
+				mov-val (:value movement 0)
 				account (:account movement)
-				history (get ret account [{:val 0}])
-				last-val (:val (last history))]
+				history (get ret account [])
+				last-val (:value (last history) 0)]
 				(recur
 					(rest sorted)
-					(assoc ret account (conj history {:date mov-date :val (+ last-val mov-val)})))))))
+					(assoc ret account (conj history {:date mov-date :value (+ last-val mov-val)})))))))

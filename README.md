@@ -1,36 +1,13 @@
-# wedge2
+# wedge²
 
-FIXME: description
+Wedge² is a (still under development) personal finances aplication.
 
-## Installation
+Main features:
 
-Download from http://example.com/FIXME.
+  * (🏗️) Support for stocks and multiple currencies including bitcoin/altcoins/cryptocurrencies with automatic prices/exchange rates.
+  * (🏗️) Support for custom assets.
+  * (🏗️) Transactions can have multiple "movements" (eg: using a credit card and your steam balance) and multiple "purchases" (eg: the different games you bought).
+  * (🏗️) Support for calculating finances when a transaction is made at one time but referes to another. Eg: a bill paid the month before or an yearly subscription.
+  * (🏗️) Search transactions, purchases and movements by tags.
 
-## Usage
-
-FIXME: explanation
-
-    $ java -jar wedge2-0.1.0-standalone.jar [args]
-
-## Options
-
-FIXME: listing of options this app accepts.
-
-## Examples
-
-...
-
-### Bugs
-
-...
-
-### Any Other Sections
-### That You Think
-### Might be Useful
-
-## License
-
-Copyright © 2017 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+(🏗️) = Not done (yet)

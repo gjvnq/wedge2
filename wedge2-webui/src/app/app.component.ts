@@ -6,5 +6,14 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
+  title = 'wedge²-webui';
+  hero: Hero = {
+  	id: 2,
+  	name: "Olá"
+  };
+}
+
+export class Hero {
+  id: number;
+  name: string;
 }

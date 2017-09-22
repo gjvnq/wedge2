@@ -1,7 +1,7 @@
 {
   "name": "wedge2-webui",
   "version": "0.0.0",
-  "license": "MIT",
+  "license": "LGPL",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

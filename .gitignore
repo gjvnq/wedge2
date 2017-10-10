@@ -1,4 +1,6 @@
 server/server
+webui/node_modules
+webui/build
 
 /target
 /classes

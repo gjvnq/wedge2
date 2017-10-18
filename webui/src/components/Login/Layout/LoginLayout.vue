@@ -15,7 +15,13 @@
                   <label for="inBookPassword" v-t="'Password'"></label>
                   <input type="password" class="form-control" id="inBookPassword">
                 </div>
-                <button type="submit" class="btn btn-default" v-on:click="login" v-t="'Login'"></button>
+                <div class="form-group">
+                  <p id="msgErrConn" class="label label-warning hide" v-t="'Failed to comunicate with the server :-('"></p>
+                </div>
+                <div class="form-group">
+                  <p id="msgErrPass" class="label label-warning hide" v-t="'Wrong password :-('"></p>
+                </div>
+                <button id="btnLogin" type="submit" class="btn btn-default" v-on:click="login" v-t="'Login'"></button>
               </form>
             </div>
           </div>
@@ -29,15 +35,51 @@
   var Cleave = require('cleave.js')
   export default {
     methods: {
+      showError (err) {
+        var el = null
+        if (err === 'conn') {
+          el = document.querySelector('#msgErrConn')
+        }
+        if (err === 'pass') {
+          el = document.querySelector('#msgErrPass')
+        }
+        el.classList.remove('hide')
+      },
+      clearErrors () {
+        document.querySelector('#msgErrPass').classList.add('hide')
+        document.querySelector('#msgErrConn').classList.add('hide')
+      },
+      lockBtn () {
+        document.querySelector('#btnLogin').disabled = true
+      },
+      unlockBtn () {
+        document.querySelector('#btnLogin').disabled = false
+      },
       login () {
-        alert('hi')
+        this.lockBtn()
+        var fd = new FormData()
+        fd.append('bookId', document.querySelector('#inBookId').value)
+        fd.append('password', document.querySelector('#inBookPassword').value)
+        this.$http.post('/api/auth', fd).then(response => {
+          // Success
+          this.unlockBtn()
+          console.log('suc', response)
+        }, response => {
+          // Error
+          this.unlockBtn()
+          if (response.status !== 403) {
+            this.showError('conn')
+          } else {
+            this.showError('pass')
+          }
+        })
       }
     },
     mounted: function () {
       this.clv = new Cleave('#inBookId', {
         delimiters: ['-', '-', '-', '-', '-'],
         blocks: [8, 4, 4, 4, 12],
-        uppercase: true
+        lowercase: true
       })
     },
     beforeDestory: function () {

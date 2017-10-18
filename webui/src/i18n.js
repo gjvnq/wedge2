@@ -5,6 +5,8 @@ export const messages = {
     Book: 'Livro',
     BookId: 'LivroId',
     Movement: 'Movimentação',
-    Transaction: 'Transação'
+    Transaction: 'Transação',
+    'Failed to comunicate with the server :-(': 'Falha ao comunicar com o servidor :-(',
+    'Wrong password :-(': 'Senha errada :-('
   }
 }

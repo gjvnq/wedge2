@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
+import VueResource from 'vue-resource'
 
 // Plugins
 import GlobalComponents from './globalComponents'
@@ -24,6 +25,7 @@ import {messages} from './i18n.js'
 // plugin setup
 Vue.use(VueI18n)
 Vue.use(VueRouter)
+Vue.use(VueResource)
 Vue.use(GlobalComponents)
 Vue.use(GlobalDirectives)
 Vue.use(Notifications)
@@ -54,6 +56,12 @@ new Vue({
   render: h => h(App),
   router,
   i18n,
+  http: {
+    root: '/root',
+    headers: {
+      Authorization: 'Basic YXBpOnBhc3N3b3Jk'
+    }
+  },
   data: {
     Chartist: Chartist
   }

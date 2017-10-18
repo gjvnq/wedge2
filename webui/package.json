@@ -14,12 +14,13 @@
     "lint": "eslint --ext .js,.vue src test/unit/specs test/e2e/specs"
   },
   "dependencies": {
-    "chartist": "^0.10.1",
-    "vue-clickaway": "^2.1.0",
-    "vue": "^2.4.2",
-    "vue-router": "^2.7.0",
     "bootstrap": "^3.3.7",
-    "es6-promise": "^4.1.1"
+    "chartist": "^0.10.1",
+    "cleave.js": "^1.0.1",
+    "es6-promise": "^4.1.1",
+    "vue": "^2.4.2",
+    "vue-clickaway": "^2.1.0",
+    "vue-router": "^2.7.0"
   },
   "devDependencies": {
     "autoprefixer": "^7.1.2",

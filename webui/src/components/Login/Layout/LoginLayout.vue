@@ -26,13 +26,22 @@
 </template>
 
 <script>
-  export default{
-    props: {
-    },
+  var Cleave = require('cleave.js')
+  export default {
     methods: {
       login () {
         alert('hi')
       }
+    },
+    mounted: function () {
+      this.clv = new Cleave('#inBookId', {
+        delimiters: ['-', '-', '-', '-', '-'],
+        blocks: [8, 4, 4, 4, 12],
+        uppercase: true
+      })
+    },
+    beforeDestory: function () {
+      this.clv.destroy()
     }
   }
 </script>

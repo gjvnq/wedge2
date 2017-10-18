@@ -8,14 +8,14 @@
               <h2 class="title text-info">wedge²</h2>
               <form>
                 <div class="form-group">
-                  <label for="inBookId">BookId</label>
-                  <input type="text" class="form-control" id="inBookId" placeholder="Ex: 00000000-0000-0000-0000-00000000000">
+                  <label for="inBookId" v-t="'BookId'"></label>
+                  <input type="text" class="form-control" id="inBookId">
                 </div>
                 <div class="form-group">
-                  <label for="inBookPassword">Password</label>
-                  <input type="password" class="form-control" id="inBookPassword" placeholder="Password">
+                  <label for="inBookPassword" v-t="'Password'"></label>
+                  <input type="password" class="form-control" id="inBookPassword">
                 </div>
-                <button type="submit" class="btn btn-default" v-on:click="login">Login</button>
+                <button type="submit" class="btn btn-default" v-on:click="login" v-t="'Login'"></button>
               </form>
             </div>
           </div>

@@ -51,17 +51,14 @@ Object.defineProperty(Vue.prototype, '$Chartist', {
 })
 
 /* eslint-disable no-new */
+Vue.http.options.root = '/api'
+Vue.http.options.root = '//localhost:8081/'
+Vue.http.headers.common['Authorization'] = 'Basic YXBpOnBhc3N3b3Jk'
 new Vue({
   el: '#app',
   render: h => h(App),
   router,
   i18n,
-  http: {
-    root: '/root',
-    headers: {
-      Authorization: 'Basic YXBpOnBhc3N3b3Jk'
-    }
-  },
   data: {
     Chartist: Chartist
   }

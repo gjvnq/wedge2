@@ -60,13 +60,15 @@
         var fd = new FormData()
         fd.append('bookId', document.querySelector('#inBookId').value)
         fd.append('password', document.querySelector('#inBookPassword').value)
-        this.$http.post('/api/auth', fd).then(response => {
+        this.clearErrors()
+        this.$http.post('auth', fd).then(response => {
           // Success
           this.unlockBtn()
           console.log('suc', response)
         }, response => {
           // Error
           this.unlockBtn()
+          console.log('err', response)
           if (response.status !== 403) {
             this.showError('conn')
           } else {

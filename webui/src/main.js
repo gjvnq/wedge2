@@ -53,6 +53,7 @@ Object.defineProperty(Vue.prototype, '$Chartist', {
 /* eslint-disable no-new */
 Vue.http.options.root = '/api'
 Vue.http.options.root = '//localhost:8081/'
+Vue.http.options.emulateJSON = false
 Vue.http.headers.common['Authorization'] = 'Basic YXBpOnBhc3N3b3Jk'
 new Vue({
   el: '#app',

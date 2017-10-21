@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/gjvnq/wedge2/domain"
-	"github.com/gorilla/mux"
 	"log"
 	"net/http"
+
+	"github.com/gjvnq/wedge2/domain"
+	"github.com/gorilla/mux"
 )
 
 func main() {
+	// Connect Database
 
+	// Listen for connections
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/", Index)
 	router.HandleFunc("/auth", Auth)
@@ -21,7 +24,7 @@ func main() {
 
 func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Headers", "Authorization")
+		w.Header().Set("Access-Control-Allow-Headers", "*, Authorization, Content-Type")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		if r.Method != "OPTIONS" {
 			next.ServeHTTP(w, r)
@@ -36,12 +39,6 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	a, b = wedge.NSplit(101, 3)
 	fmt.Fprintf(w, "%+v %+v\n", a, b)
 	fmt.Fprintf(w, "%+v\n", trn)
-}
-
-func Auth(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusForbidden)
-	fmt.Fprintln(w, "Auth?")
-	fmt.Println("Auth?")
 }
 
 func TodoShow(w http.ResponseWriter, r *http.Request) {

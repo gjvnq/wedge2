@@ -1,6 +1,10 @@
 package wedge
 
-import "fmt"
+import (
+	"fmt"
+	"database/sql/driver"
+	"errors"
+)
 
 const DAY_ANY = 0
 const YEAR_ANY = 0
@@ -21,7 +25,7 @@ const MONTH_DEC = 12
 type LDate struct {
 	year int
 	month int
-	month_day int
+	day int
 	year_day int
 }
 
@@ -87,15 +91,48 @@ func (ld LDate) month_day_to_year_day() int {
 	for i := 1; i <= ld.month; i++ {
 		count += DaysInMonth(i, ld.year)
 	}
-	count += ld.month_day
+	count += ld.day
 	return count
 }
 
 func (ld LDate) is_valid() bool {
 	max_days := DaysInMonth(ld.month, ld.year)
-	return 0 <= ld.month_day && ld.month_day <= max_days
+	return 0 <= ld.day && ld.day <= max_days
 }
 
 func (ld LDate) String() string {
-	return fmt.Sprintf("%04d-%02d-%02dLD", ld.year, ld.month, ld.month_day)
+	return fmt.Sprintf("%04d-%02d-%02dLD", ld.year, ld.month, ld.day)
+}
+
+func Limit99(v int) int {
+	if v < 0 {
+		return v
+	}
+	if v > 99 {
+		return 99
+	}
+	return v
+}
+
+func (ld LDate) Value() (driver.Value, error) {
+	return int(1E4)*ld.year+int(1E2)*Limit99(ld.month)+Limit99(ld.day), nil
+}
+
+func (ld *LDate) Scan(value interface{}) error {
+	if value == nil {
+		ld.year = 0
+		ld.month = 0
+		ld.day = 0
+		return nil
+	}
+	if iv, err := driver.Int32.ConvertValue(value); err == nil {
+		if v, ok := iv.(int); ok {
+			ld.year = v/int(1E4)
+			v = v % int(1E4)
+			ld.month = v
+			ld.day = v % int(1E2)
+			return nil
+		}
+	}
+	return errors.New("failed to scan LDate")
 }

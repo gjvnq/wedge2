@@ -57,9 +57,10 @@
       },
       login () {
         this.lockBtn()
-        var fd = new FormData()
-        fd.append('bookId', document.querySelector('#inBookId').value)
-        fd.append('password', document.querySelector('#inBookPassword').value)
+        var fd = {}
+        fd['bookId'] = document.querySelector('#inBookId').value
+        fd['password'] = document.querySelector('#inBookPassword').value
+        console.log(fd)
         this.clearErrors()
         this.$http.post('auth', fd).then(response => {
           // Success

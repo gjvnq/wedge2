@@ -1,9 +1,9 @@
 package wedge
 
 import (
-	"fmt"
 	"database/sql/driver"
 	"errors"
+	"fmt"
 )
 
 const DAY_ANY = 0
@@ -23,20 +23,20 @@ const MONTH_NOV = 11
 const MONTH_DEC = 12
 
 type LDate struct {
-	year int
-	month int
-	day int
+	year     int
+	month    int
+	day      int
 	year_day int
 }
 
 func IsLeapYear(year int) bool {
-	if year % 4 != 0 {
+	if year%4 != 0 {
 		return false
 	}
-	if year % 100 != 0 {
+	if year%100 != 0 {
 		return true
 	}
-	if year % 400 != 0 {
+	if year%400 != 0 {
 		return false
 	}
 	return true
@@ -47,7 +47,7 @@ func DaysInMonth(month int, year int) int {
 }
 
 func DaysInMonthLeap(month int, leap bool) int {
-	switch (month) {
+	switch month {
 	case MONTH_ANY:
 		return 31
 	case MONTH_JAN:
@@ -115,7 +115,7 @@ func Limit99(v int) int {
 }
 
 func (ld LDate) Value() (driver.Value, error) {
-	return int(1E4)*ld.year+int(1E2)*Limit99(ld.month)+Limit99(ld.day), nil
+	return int(1E4)*ld.year + int(1E2)*Limit99(ld.month) + Limit99(ld.day), nil
 }
 
 func (ld *LDate) Scan(value interface{}) error {
@@ -127,7 +127,7 @@ func (ld *LDate) Scan(value interface{}) error {
 	}
 	if iv, err := driver.Int32.ConvertValue(value); err == nil {
 		if v, ok := iv.(int); ok {
-			ld.year = v/int(1E4)
+			ld.year = v / int(1E4)
 			v = v % int(1E4)
 			ld.month = v
 			ld.day = v % int(1E2)

@@ -1,7 +1,7 @@
 package wedge
 
 func Div(dividend int, divisor int) (quotient int, remainder int) {
-	quotient = dividend/divisor
+	quotient = dividend / divisor
 	remainder = dividend - quotient*divisor
 	return
 }

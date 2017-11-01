@@ -8,8 +8,11 @@
               <h2 class="title text-info">wedge²</h2>
               <form>
                 <div class="form-group">
-                  <label for="inBookId" v-t="'BookId'"></label>
-                  <input type="text" class="form-control" id="inBookId">
+                  <label for="inBookId" v-t="'Book'"></label>
+                  <select class="form-control" id="inBookId" v-model="selected_book">
+                    <option v-for="book in books" :value="book.ID">{{book.Name}} ({{book.ID}})</option>
+  </select>
+                  </select>
                 </div>
                 <div class="form-group">
                   <label for="inBookPassword" v-t="'Password'"></label>
@@ -35,7 +38,6 @@
 </template>
 
 <script>
-  var Cleave = require('cleave.js')
   export default {
     methods: {
       showError (err) {
@@ -84,17 +86,26 @@
             this.showError('conn')
           }
         })
+      },
+      list_books () {
+        this.$http.get('books').then(response => {
+          console.log('suc', response)
+          this.books = response.body
+          console.log(this.books)
+        }, response => {
+          console.log('err', response)
+        })
       }
     },
-    mounted: function () {
-      this.clv = new Cleave('#inBookId', {
-        delimiters: ['-', '-', '-', '-', '-'],
-        blocks: [8, 4, 4, 4, 12],
-        lowercase: true
-      })
+    mounted () {
+      this.list_books()
     },
-    beforeDestory: function () {
-      this.clv.destroy()
+    // props: ['selected_book', 'books']
+    data () {
+      return {
+        books: [],
+        selected_book: null
+      }
     }
   }
 </script>

@@ -2,14 +2,14 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 
-	"github.com/satori/go.uuid"
+	"github.com/gjvnq/go.uuid"
+	"github.com/gjvnq/wedge2/domain"
 )
 
 type AuthReq struct {
-	BookId   uuid.UUID `json:"bookId"`
+	BookID   uuid.UUID `json:"book_id"`
 	Password string    `json:"password"`
 }
 
@@ -21,11 +21,29 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
+	if auth_req.BookID.IsNil() {
+		http.Error(w, "ID must not be null", 404)
+		return
+	}
 
-	// Debug
-	fmt.Println(auth_req)
+	// Load book
+	book, err, not_found := wedge.Books_GetByID(auth_req.BookID)
+	if not_found {
+		http.Error(w, err.Error(), 404)
+		return
+	}
+	if err != nil {
+		http.Error(w, "", 500)
+		return
+	}
 
-	// Check with DB
+	// Check password
+	if book.CheckPassword(auth_req.Password) == false {
+		Log.InfoF("Wrong password for %s", auth_req.BookID.String())
+		w.WriteHeader(http.StatusForbidden)
+		return
+	}
+	Log.InfoF("Right password for %s", auth_req.BookID.String())
+
+	w.WriteHeader(http.StatusOK)
 }
-
-// w.WriteHeader(http.StatusForbidden)

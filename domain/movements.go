@@ -7,7 +7,7 @@ import (
 )
 
 type Movement struct {
-	ID            uuid.UUID `json:"id" gorm:"primary_key"`
+	ID            uuid.UUID `json:"id"`
 	AccountID     uuid.UUID `json:"account_id"`
 	AssetID       uuid.UUID `json:"asset_id"`
 	TransactionID uuid.UUID `json:"transaction_id"`

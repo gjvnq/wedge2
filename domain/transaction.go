@@ -7,7 +7,7 @@ import (
 )
 
 type Transaction struct {
-	ID        uuid.UUID `json:"id" gorm:"primary_key"`
+	ID        uuid.UUID `json:"id"`
 	Name      string    `json:"name"`
 	LocalDate LDate     `json:"local_date"`
 	// Date Stuff

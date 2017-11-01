@@ -16,6 +16,9 @@
                   <input type="password" class="form-control" id="inBookPassword">
                 </div>
                 <div class="form-group">
+                  <p id="msgErr404" class="label label-warning hide" v-t="'No such book :-('"></p>
+                </div>
+                <div class="form-group">
                   <p id="msgErrConn" class="label label-warning hide" v-t="'Failed to comunicate with the server :-('"></p>
                 </div>
                 <div class="form-group">
@@ -40,7 +43,10 @@
         if (err === 'conn') {
           el = document.querySelector('#msgErrConn')
         }
-        if (err === 'pass') {
+        if (err === '404') {
+          el = document.querySelector('#msgErr404')
+        }
+        if (err === 'password') {
           el = document.querySelector('#msgErrPass')
         }
         el.classList.remove('hide')
@@ -48,6 +54,7 @@
       clearErrors () {
         document.querySelector('#msgErrPass').classList.add('hide')
         document.querySelector('#msgErrConn').classList.add('hide')
+        document.querySelector('#msgErr404').classList.add('hide')
       },
       lockBtn () {
         document.querySelector('#btnLogin').disabled = true
@@ -58,9 +65,8 @@
       login () {
         this.lockBtn()
         var fd = {}
-        fd['bookId'] = document.querySelector('#inBookId').value
+        fd['book_id'] = document.querySelector('#inBookId').value
         fd['password'] = document.querySelector('#inBookPassword').value
-        console.log(fd)
         this.clearErrors()
         this.$http.post('auth', fd).then(response => {
           // Success
@@ -70,10 +76,12 @@
           // Error
           this.unlockBtn()
           console.log('err', response)
-          if (response.status !== 403) {
-            this.showError('conn')
+          if (response.status === 404) {
+            this.showError('404')
+          } else if (response.status === 403) {
+            this.showError('password')
           } else {
-            this.showError('pass')
+            this.showError('conn')
           }
         })
       }

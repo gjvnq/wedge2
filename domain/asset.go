@@ -7,7 +7,7 @@ import (
 )
 
 type Asset struct {
-	ID     uuid.UUID `json:"id" gorm:"primary_key"`
+	ID     uuid.UUID `json:"id"`
 	BookID uuid.UUID `json:"book_id"`
 	Name   string    `json:"name"`
 	Code   string    `json:"code"`

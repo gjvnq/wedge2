@@ -22,3 +22,7 @@ func (book *Book) CheckPassword(password string) bool {
 	err := bcrypt.CompareHashAndPassword(book.Password, []byte(password))
 	return err == nil
 }
+
+func (book *Book) Redact() {
+	book.Password = nil
+}

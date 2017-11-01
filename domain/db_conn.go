@@ -22,3 +22,29 @@ func Books_GetByID(id uuid.UUID) (Book, error, bool) {
 	}
 	return book, nil, false
 }
+
+func Books_All(redact bool) ([]Book, error) {
+	books := make([]Book, 0)
+	rows, err := DB.Query("SELECT `ID`, `Name`, `Password` FROM `books`")
+	if err == sql.ErrNoRows {
+		return nil, err
+	}
+	if err != nil {
+		Log.WarningF("Error when loading books: %#v", err)
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		book := Book{}
+		err = rows.Scan(&book.ID, &book.Name, &book.Password)
+		if err != nil {
+			Log.WarningF("Error when loading book %s: %#v", book.ID.String(), err)
+			return nil, err
+		}
+		if redact {
+			book.Redact()
+		}
+		books = append(books, book)
+	}
+	return books, nil
+}

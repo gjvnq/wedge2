@@ -2,8 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"fmt"
-	"log"
+	"encoding/json"
 	"net/http"
 	"os"
 
@@ -33,13 +32,12 @@ func main() {
 
 	// Listen for connections
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/", Index)
-	router.HandleFunc("/auth", Auth)
-	router.HandleFunc("/todos/{todoId}", TodoShow)
+	router.HandleFunc("/books", Books).Methods("GET")
+	router.HandleFunc("/auth", Auth).Methods("POST")
 
 	handler := CorsMiddleware(router)
 	Log.Notice("Now listening...")
-	log.Fatal(http.ListenAndServe(":8081", handler))
+	Log.Fatal(http.ListenAndServe(":8081", handler))
 }
 
 func CorsMiddleware(next http.Handler) http.Handler {
@@ -52,17 +50,19 @@ func CorsMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func Index(w http.ResponseWriter, r *http.Request) {
-	trn := wedge.Transaction{}
-	a, b := wedge.Div(101, 3)
-	fmt.Fprintf(w, "%+v %+v\n", a, b)
-	a, b = wedge.NSplit(101, 3)
-	fmt.Fprintf(w, "%+v %+v\n", a, b)
-	fmt.Fprintf(w, "%+v\n", trn)
-}
+func sendJSONResponse(w http.ResponseWriter, data interface{}) {
+	body, err := json.Marshal(data)
+	if err != nil {
+		Log.WarningNF(1, "Failed to encode a JSON response: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
-func TodoShow(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	todoId := vars["todoId"]
-	fmt.Fprintln(w, "Todo show:", todoId)
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(body)
+	if err != nil {
+		Log.WarningNF(1, "Failed to write the response body: %v", err)
+		return
+	}
 }

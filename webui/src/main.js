@@ -54,7 +54,7 @@ Object.defineProperty(Vue.prototype, '$Chartist', {
 Vue.http.options.root = '/api'
 Vue.http.options.root = '//localhost:8081/'
 Vue.http.options.emulateJSON = false
-Vue.http.headers.common['Authorization'] = 'Basic YXBpOnBhc3N3b3Jk'
+Vue.http.headers.common['Authorization'] = 'Bearer'
 new Vue({
   el: '#app',
   render: h => h(App),

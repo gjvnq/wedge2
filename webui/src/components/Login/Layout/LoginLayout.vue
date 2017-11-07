@@ -38,6 +38,7 @@
 </template>
 
 <script>
+  import Vue from 'vue'
   export default {
     methods: {
       showError (err) {
@@ -73,6 +74,7 @@
         this.$http.post('auth', fd).then(response => {
           // Success
           this.unlockBtn()
+          Vue.http.headers.common['Authorization'] = 'Bearer ' + response.bodyText
           console.log('suc', response)
         }, response => {
           // Error

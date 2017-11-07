@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/rand"
 	"database/sql"
 	"encoding/json"
 	"net/http"
@@ -13,6 +14,7 @@ import (
 )
 
 var Log *logger.Logger
+var JWTKey []byte
 
 func main() {
 	var err error
@@ -24,6 +26,14 @@ func main() {
 	}
 	wedge.Log = Log
 
+	// Generate secure key for JWT
+	JWTKey = make([]byte, 16)
+	_, err = rand.Read(JWTKey)
+	if err != nil {
+		Log.Fatal("Failed to generate secure key:", err)
+		return
+	}
+
 	// Connect Database
 	wedge.DB, err = sql.Open("mysql", GetDBStringURI())
 	if err != nil {
@@ -34,6 +44,7 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/books", Books).Methods("GET")
 	router.HandleFunc("/auth", Auth).Methods("POST")
+	router.HandleFunc("/auth/test", AuthTest).Methods("POST")
 
 	handler := CorsMiddleware(router)
 	Log.Notice("Now listening...")
@@ -61,6 +72,19 @@ func sendJSONResponse(w http.ResponseWriter, data interface{}) {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	w.WriteHeader(http.StatusOK)
 	_, err = w.Write(body)
+	if err != nil {
+		Log.WarningNF(1, "Failed to write the response body: %v", err)
+		return
+	}
+}
+
+func sendResponse(w http.ResponseWriter, mime string, data []byte) {
+	var err error
+	if mime != "" {
+		w.Header().Set("Content-Type", mime)
+	}
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(data)
 	if err != nil {
 		Log.WarningNF(1, "Failed to write the response body: %v", err)
 		return

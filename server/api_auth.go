@@ -3,7 +3,10 @@ package main
 import (
 	"encoding/json"
 	"net/http"
+	"time"
 
+	"github.com/SermoDigital/jose/crypto"
+	"github.com/SermoDigital/jose/jws"
 	"github.com/gjvnq/go.uuid"
 	"github.com/gjvnq/wedge2/domain"
 )
@@ -12,6 +15,8 @@ type AuthReq struct {
 	BookID   uuid.UUID `json:"book_id"`
 	Password string    `json:"password"`
 }
+
+const DEFAULT_TOKEN_LIFE = 15 * time.Minute
 
 func Auth(w http.ResponseWriter, r *http.Request) {
 	// Load request parameters
@@ -39,11 +44,55 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 
 	// Check password
 	if book.CheckPassword(auth_req.Password) == false {
-		Log.InfoF("Wrong password for %s", auth_req.BookID.String())
-		w.WriteHeader(http.StatusForbidden)
+		Log.WarningF("Wrong password for %s", auth_req.BookID.String())
+		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}
 	Log.InfoF("Right password for %s", auth_req.BookID.String())
 
-	w.WriteHeader(http.StatusOK)
+	// Generate JWT
+	claims := jws.Claims{}
+	claims.SetIssuedAt(time.Now())
+	claims.SetSubject(book.ID.String())
+	claims.SetExpiration(time.Now().Add(DEFAULT_TOKEN_LIFE))
+	token := jws.NewJWT(claims, crypto.SigningMethodHS256)
+	b, err := token.Serialize(JWTKey)
+	if err != nil {
+		Log.Warning("Failed to generate token:", err.Error())
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	sendResponse(w, "", b)
+}
+
+func AuthTest(w http.ResponseWriter, r *http.Request) {
+	if IsAuthInvalid(w, r, uuid.FromStringOrNil("10000000-0000-0000-0000-000000000000")) {
+		return
+	}
+	sendResponse(w, "", []byte("hi"))
+}
+
+func IsAuthInvalid(w http.ResponseWriter, r *http.Request, book_id uuid.UUID) bool {
+	// Parse JWT
+	token, err := jws.ParseJWTFromRequest(r)
+	if err != nil {
+		Log.WarningF("Unparsable JWT: %s", string(r.Header.Get("Authorization")))
+		w.WriteHeader(http.StatusUnauthorized)
+		return true
+	}
+	// Validate JWT
+	if token.Validate(JWTKey, crypto.SigningMethodHS256) != nil {
+		Log.WarningF("Invalid JWT: %+v", token.Claims())
+		w.WriteHeader(http.StatusUnauthorized)
+		return true
+	}
+	// Check subject
+	right_sub := book_id.String()
+	if sub, _ := token.Claims().Subject(); sub != right_sub {
+		Log.WarningF("Wrong subject on JWT. Got %s Expected %s", sub, right_sub)
+		w.WriteHeader(http.StatusForbidden)
+		return true
+	}
+	return false
 }

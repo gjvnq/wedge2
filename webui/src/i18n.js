@@ -11,7 +11,12 @@ export const messages = {
     Account: 'Conta',
     Accounts: 'Contas',
     Summary: 'Resumo',
-    'Currencies & Assets': 'Moedas & Bens',
+    Name: 'Nome',
+    'Decimal Places': 'Casas Decimais',
+    'Formating': 'Formatação',
+    'Add Currency or Asset': 'Adicionar Bem ou Moeda',
+    'Last Value': 'Último valor',
+    'Currencies & Assets': 'Bens & Moedas',
     'Failed to comunicate with the server :-(': 'Falha ao comunicar com o servidor :-(',
     'Wrong password :-(': 'Senha errada :-(',
     'No such book :-(': 'Livro não existe :-('

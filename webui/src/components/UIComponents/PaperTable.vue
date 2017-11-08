@@ -9,7 +9,7 @@
     <div class="content table-responsive table-full-width">
       <table class="table" :class="tableClass">
         <thead>
-          <th v-for="column in columns">{{column}}</th>
+          <th v-for="column in columns">{{$t(column)}}</th>
         </thead>
         <tbody>
           <tr v-for="item in data">

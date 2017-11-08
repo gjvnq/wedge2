@@ -17,13 +17,28 @@ const routes = [
     component: LoginLayout
   },
   {
-    path: '/admin',
+    path: '/book',
     component: DashboardLayout,
-    redirect: '/admin/stats',
+    redirect: '/book/summary',
     children: [
       {
-        path: 'overview',
-        name: 'overview',
+        path: 'summary',
+        name: 'Summary',
+        component: Overview
+      },
+      {
+        path: 'Accounts',
+        name: 'Accounts',
+        component: Overview
+      },
+      {
+        path: 'assets',
+        name: 'Currencies & Assets',
+        component: Overview
+      },
+      {
+        path: 'transactions',
+        name: 'Transactions',
         component: Overview
       }
     ]

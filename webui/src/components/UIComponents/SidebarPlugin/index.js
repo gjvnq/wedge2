@@ -4,14 +4,26 @@ const SidebarStore = {
   showSidebar: false,
   sidebarLinks: [
     {
-      name: 'Dashboard',
+      name: 'Summary',
       icon: 'ti-panel',
-      path: '/admin/overview'
+      path: '/book/summary'
+    },
+    {
+      name: 'Accounts',
+      icon: 'ti-wallet',
+      path: '/book/accounts'
+    },
+    {
+      name: 'Currencies & Assets',
+      icon: 'ti-gift',
+      path: '/book/assets'
+    },
+    {
+      name: 'Transactions',
+      icon: 'ti-shopping-cart',
+      path: '/book/transactions'
     }
-  ],
-  displaySidebar (value) {
-    this.showSidebar = value
-  }
+  ]
 }
 
 const SidebarPlugin = {

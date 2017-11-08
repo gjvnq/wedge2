@@ -25,8 +25,7 @@
           <a>
             <i :class="link.icon"></i>
 
-            <p>{{link.name}}
-            </p>
+            <p>{{$t(link.name)}}</p>
           </a>
         </router-link>
       </ul>

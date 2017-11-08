@@ -76,13 +76,15 @@
           this.unlockBtn()
           Vue.http.headers.common['Authorization'] = 'Bearer ' + response.bodyText
           console.log('suc', response)
+          console.log('suc', this.$router)
+          this.$router.push('book')
         }, response => {
           // Error
           this.unlockBtn()
           console.log('err', response)
           if (response.status === 404) {
             this.showError('404')
-          } else if (response.status === 403) {
+          } else if (response.status === 403 || response.status === 401) {
             this.showError('password')
           } else {
             this.showError('conn')
@@ -102,7 +104,6 @@
     mounted () {
       this.list_books()
     },
-    // props: ['selected_book', 'books']
     data () {
       return {
         books: [],

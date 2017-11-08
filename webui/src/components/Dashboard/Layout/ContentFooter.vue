@@ -4,7 +4,7 @@
       <nav class="pull-left">
         <ul>
           <li>
-            <router-link :to="{path:'/admin'}">Dashboard</router-link>
+            <router-link :to="{path:'/book'}">Dashboard</router-link>
           </li>
         </ul>
       </nav>

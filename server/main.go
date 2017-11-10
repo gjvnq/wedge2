@@ -8,6 +8,7 @@ import (
 	"os"
 
 	"github.com/gjvnq/go-logger"
+	uuid "github.com/gjvnq/go.uuid"
 	"github.com/gjvnq/wedge2/domain"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/gorilla/mux"
@@ -42,7 +43,9 @@ func main() {
 
 	// Listen for connections
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc("/books", Books).Methods("GET")
+	router.HandleFunc("/books", BooksList).Methods("GET")
+	router.HandleFunc("/books/{book-id}/assets", AssetsList).Methods("GET")
+	router.HandleFunc("/books/{book-id}/assets/{asset-code}", AssetsPut).Methods("PUT")
 	router.HandleFunc("/auth", Auth).Methods("POST")
 	router.HandleFunc("/auth/test", AuthTest).Methods("POST")
 
@@ -89,4 +92,13 @@ func sendResponse(w http.ResponseWriter, mime string, data []byte) {
 		Log.WarningNF(1, "Failed to write the response body: %v", err)
 		return
 	}
+}
+
+func GetBookId(r *http.Request) uuid.UUID {
+	return GetUUID("book-id", r)
+}
+
+func GetUUID(key string, r *http.Request) uuid.UUID {
+	vars := mux.Vars(r)
+	return uuid.FromStringOrNil(vars[key])
 }

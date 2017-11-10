@@ -1,9 +1,7 @@
 package wedge
 
 import (
-	"time"
-
-	"github.com/satori/go.uuid"
+	"github.com/gjvnq/go.uuid"
 )
 
 type Asset struct {
@@ -13,10 +11,4 @@ type Asset struct {
 	Code   string    `json:"code"`
 	Places int       `json:"places"`
 	Fmt    string    `json:"fmt"`
-	// Date Stuff
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	// Associations
-	Book   Book         `json:"book,omitempty"`
-	Values []AssetValue `json:"values,omitempty"`
 }

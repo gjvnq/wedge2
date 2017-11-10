@@ -6,7 +6,7 @@ import (
 	"github.com/gjvnq/wedge2/domain"
 )
 
-func Books(w http.ResponseWriter, r *http.Request) {
+func BooksList(w http.ResponseWriter, r *http.Request) {
 	// Load books
 	books, err := wedge.Books_All(true)
 	if err != nil {

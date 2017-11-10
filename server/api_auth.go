@@ -9,6 +9,7 @@ import (
 	"github.com/SermoDigital/jose/jws"
 	"github.com/gjvnq/go.uuid"
 	"github.com/gjvnq/wedge2/domain"
+	"github.com/gorilla/mux"
 )
 
 type AuthReq struct {
@@ -67,13 +68,15 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 }
 
 func AuthTest(w http.ResponseWriter, r *http.Request) {
-	if IsAuthInvalid(w, r, uuid.FromStringOrNil("10000000-0000-0000-0000-000000000000")) {
+	if IsAuthInvalid(w, r) {
 		return
 	}
-	sendResponse(w, "", []byte("hi"))
+	sendResponse(w, "", []byte("ok"))
 }
 
-func IsAuthInvalid(w http.ResponseWriter, r *http.Request, book_id uuid.UUID) bool {
+func IsAuthInvalid(w http.ResponseWriter, r *http.Request) bool {
+	// Get Book Id
+	vars := mux.Vars(r)
 	// Parse JWT
 	token, err := jws.ParseJWTFromRequest(r)
 	if err != nil {
@@ -88,7 +91,7 @@ func IsAuthInvalid(w http.ResponseWriter, r *http.Request, book_id uuid.UUID) bo
 		return true
 	}
 	// Check subject
-	right_sub := book_id.String()
+	right_sub := vars["book-id"]
 	if sub, _ := token.Claims().Subject(); sub != right_sub {
 		Log.WarningF("Wrong subject on JWT. Got %s Expected %s", sub, right_sub)
 		w.WriteHeader(http.StatusForbidden)

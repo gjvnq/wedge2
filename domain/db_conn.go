@@ -48,3 +48,89 @@ func Books_All(redact bool) ([]Book, error) {
 	}
 	return books, nil
 }
+
+func Assets_InBook(book_id uuid.UUID) ([]Asset, error) {
+	assets := make([]Asset, 0)
+	rows, err := DB.Query("SELECT `ID`, `BookID`, `Name`, `Code`, `Places` FROM `assets` WHERE `BookID` = ?", book_id)
+	if err == sql.ErrNoRows {
+		return nil, err
+	}
+	if err != nil {
+		Log.WarningF("Error when loading assets: %#v", err)
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		asset := Asset{}
+		err = rows.Scan(
+			&asset.ID,
+			&asset.BookID,
+			&asset.Name,
+			&asset.Code,
+			&asset.Places)
+		if err != nil {
+			Log.WarningF("Error when loading asset %s: %#v", asset.ID.String(), err)
+			return nil, err
+		}
+		assets = append(assets, asset)
+	}
+	return assets, nil
+}
+
+func Assets_GetById(asset_id uuid.UUID) (Asset, error, bool) {
+	asset := Asset{}
+	err := DB.QueryRow("SELECT `ID`, `BookID`, `Name`, `Code`, `Places` FROM `assets` WHERE `ID` = ?", asset_id).Scan(
+		&asset.ID,
+		&asset.BookID,
+		&asset.Name,
+		&asset.Code,
+		&asset.Places)
+	if err == sql.ErrNoRows {
+		return Asset{}, err, true
+	}
+	if err != nil {
+		Log.WarningF("Error when loading asset %s: %#v", asset.ID.String(), err)
+		return Asset{}, err, false
+	}
+	return asset, nil, false
+}
+
+func Assets_Update(asset *Asset) error {
+	err := DB.QueryRow("UPDATE `assets` SET `BookID` = ?, `Name` = ?, `Code` = ?, `Places` = ? WHERE `ID` = ?",
+		asset.BookID,
+		asset.Name,
+		asset.Code,
+		asset.Places,
+		asset.ID).Scan()
+	if err != nil {
+		Log.WarningF("Error when updating asset %s: %#v", asset.ID.String(), err)
+		return err
+	}
+	return nil
+}
+
+func Assets_Insert(asset *Asset) error {
+	err := DB.QueryRow("INSERT INTO `assets` (`ID`, `BookID`, `Name`, `Code`, `Places`) VALUES (?, ?, ?, ?, ?);",
+		asset.ID,
+		asset.BookID,
+		asset.Name,
+		asset.Code,
+		asset.Places).Scan()
+	if err != nil {
+		Log.WarningF("Error when inserting asset %s: %#v", asset.ID.String(), err)
+		return err
+	}
+	return nil
+}
+
+func Assets_Put(asset *Asset) error {
+	if asset.ID.IsNil() {
+		asset.ID = uuid.NewV4()
+		return Assets_Insert(asset)
+	}
+	err := Assets_Update(asset)
+	if err != nil {
+		return Assets_Insert(asset)
+	}
+	return nil
+}

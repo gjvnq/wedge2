@@ -8,6 +8,7 @@
         <div class="content">
           <form lpformnum="1">
             <div class="row">
+              <div class="col-md-1"></div>
               <div class="col-md-3">
                 <div class="form-group">
                   <label>{{$t('Id')}}</label>
@@ -24,12 +25,6 @@
                 <div class="form-group">
                   <label>{{$t('Decimal Places')}}</label>
                   <input type="number" class="form-control border-input">
-                </div>
-              </div>
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>{{$t('Formating')}}</label>
-                  <input type="text" class="form-control border-input">
                 </div>
               </div>
             </div>

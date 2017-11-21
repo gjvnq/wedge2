@@ -16,7 +16,7 @@
                 </div>
                 <div class="form-group">
                   <label for="inBookPassword" v-t="'Password'"></label>
-                  <input type="password" class="form-control" id="inBookPassword">
+                  <input type="password" class="form-control" id="inBookPassword" v-model="password">
                 </div>
                 <div class="form-group">
                   <p id="msgErr404" class="label label-warning hide" v-t="'No such book :-('"></p>
@@ -68,15 +68,13 @@
       login () {
         this.lockBtn()
         var fd = {}
-        fd['book_id'] = document.querySelector('#inBookId').value
-        fd['password'] = document.querySelector('#inBookPassword').value
+        fd['book_id'] = this.selected_book
+        fd['password'] = this.password
         this.clearErrors()
         this.$http.post('auth', fd).then(response => {
           // Success
           this.unlockBtn()
           Vue.http.headers.common['Authorization'] = 'Bearer ' + response.bodyText
-          console.log('suc', response)
-          console.log('suc', this.$router)
           this.$router.push('book')
         }, response => {
           // Error
@@ -107,7 +105,8 @@
     data () {
       return {
         books: [],
-        selected_book: null
+        selected_book: null,
+        password: ''
       }
     }
   }

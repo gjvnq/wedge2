@@ -19,15 +19,15 @@
                   <input type="password" class="form-control" id="inBookPassword" v-model="password">
                 </div>
                 <div class="form-group">
-                  <p id="msgErr404" class="label label-warning hide" v-t="'No such book :-('"></p>
+                  <p id="msgErr404" class="label label-warning" :class="{ hide: flagHideErr404 }" v-t="'No such book :-('"></p>
                 </div>
                 <div class="form-group">
-                  <p id="msgErrConn" class="label label-warning hide" v-t="'Failed to comunicate with the server :-('"></p>
+                  <p id="msgErrConn" class="label label-warning" :class="{ hide: flagHideErrConn }" v-t="'Failed to comunicate with the server :-('"></p>
                 </div>
                 <div class="form-group">
-                  <p id="msgErrPass" class="label label-warning hide" v-t="'Wrong password :-('"></p>
+                  <p id="msgErrPass" class="label label-warning" :class="{ hide: flagHideErrPass }" v-t="'Wrong password :-('"></p>
                 </div>
-                <button id="btnLogin" type="submit" class="btn btn-default" v-on:click="login" v-t="'Login'"></button>
+                <button id="btnLogin" type="submit" class="btn btn-default" :disabled="flagBtn == false" v-on:click="login" v-t="'Login'"></button>
               </form>
             </div>
           </div>
@@ -41,51 +41,33 @@
   import Vue from 'vue'
   export default {
     methods: {
-      showError (err) {
-        var el = null
-        if (err === 'conn') {
-          el = document.querySelector('#msgErrConn')
-        }
-        if (err === '404') {
-          el = document.querySelector('#msgErr404')
-        }
-        if (err === 'password') {
-          el = document.querySelector('#msgErrPass')
-        }
-        el.classList.remove('hide')
-      },
       clearErrors () {
-        document.querySelector('#msgErrPass').classList.add('hide')
-        document.querySelector('#msgErrConn').classList.add('hide')
-        document.querySelector('#msgErr404').classList.add('hide')
-      },
-      lockBtn () {
-        document.querySelector('#btnLogin').disabled = true
-      },
-      unlockBtn () {
-        document.querySelector('#btnLogin').disabled = false
+        this.flagHideErr404 = true
+        this.flagHideErrPass = true
+        this.flagHideErrConn = true
       },
       login () {
-        this.lockBtn()
+        // UI
+        this.clearErrors()
+        this.flagBtn = false
+        // Data
         var fd = {}
         fd['book_id'] = this.selected_book
         fd['password'] = this.password
-        this.clearErrors()
-        this.$http.post('auth', fd).then(response => {
-          // Success
-          this.unlockBtn()
+        // Send request
+        this.$http.post('auth', fd).then(response => { // Success
+          this.flagBtn = true
           Vue.http.headers.common['Authorization'] = 'Bearer ' + response.bodyText
           this.$router.push('book')
-        }, response => {
-          // Error
-          this.unlockBtn()
+        }, response => { // Error
           console.log('err', response)
+          this.flagBtn = true
           if (response.status === 404) {
-            this.showError('404')
+            this.flagHideErr404 = false
           } else if (response.status === 403 || response.status === 401) {
-            this.showError('password')
+            this.flagHideErrPass = false
           } else {
-            this.showError('conn')
+            this.flagHideErrConn = false
           }
         })
       },
@@ -106,7 +88,11 @@
       return {
         books: [],
         selected_book: null,
-        password: ''
+        password: '',
+        flagHideErr404: true,
+        flagHideErrPass: true,
+        flagHideErrConn: true,
+        flagBtn: true
       }
     }
   }

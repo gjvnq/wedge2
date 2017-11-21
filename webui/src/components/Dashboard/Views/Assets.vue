@@ -12,24 +12,24 @@
               <div class="col-md-3">
                 <div class="form-group">
                   <label>{{$t('Id')}}</label>
-                  <input type="text" class="form-control border-input">
+                  <input type="text" class="form-control border-input" v-bind="newAssetID">
                 </div>
               </div>
               <div class="col-md-5">
                 <div class="form-group">
                   <label>{{$t('Name')}}</label>
-                  <input type="text" class="form-control border-input">
+                  <input type="text" class="form-control border-input" v-bind="newAssetName">
                 </div>
               </div>
               <div class="col-md-2">
                 <div class="form-group">
                   <label>{{$t('Decimal Places')}}</label>
-                  <input type="number" class="form-control border-input">
+                  <input type="number" class="form-control border-input" v-bind="newAssetPlaces">
                 </div>
               </div>
             </div>
             <div class="text-center">
-              <button type="submit" class="btn btn-info btn-fill btn-wd">{{$t('Add Currency or Asset')}}</button>
+              <button type="submit" class="btn btn-info btn-fill btn-wd" v-on:click="addAsset">{{$t('Add Currency or Asset')}}</button>
             </div>
             <div class="clearfix">
             </div>
@@ -89,8 +89,15 @@
     components: {
       PaperTable
     },
+    methods: {
+      addAsset () {
+      }
+    },
     data () {
       return {
+        newAssetID: '',
+        newAssetName: '',
+        newAssetPlaces: 0,
         table1: {
           title: 'Currencies & Assets',
           subTitle: '',

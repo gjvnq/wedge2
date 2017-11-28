@@ -57,7 +57,10 @@
         // Send request
         this.$http.post('auth', fd).then(response => { // Success
           this.flagBtn = true
+          Vue.http.options.book_id = fd['book_id']
           Vue.http.headers.common['Authorization'] = 'Bearer ' + response.bodyText
+          localStorage.setItem('Authorization', response.bodyText)
+          localStorage.setItem('BookId', fd['book_id'])
           this.$router.push('book')
         }, response => { // Error
           console.log('err', response)

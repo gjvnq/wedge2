@@ -12,6 +12,7 @@ export const messages = {
     Accounts: 'Contas',
     Summary: 'Resumo',
     Name: 'Nome',
+    Code: 'Código',
     'Decimal Places': 'Casas Decimais',
     'Formating': 'Formatação',
     'Add Currency or Asset': 'Adicionar Bem ou Moeda',

@@ -17,7 +17,7 @@ type AuthReq struct {
 	Password string    `json:"password"`
 }
 
-const DEFAULT_TOKEN_LIFE = 15 * time.Minute
+const DEFAULT_TOKEN_LIFE = 60 * time.Minute
 
 func Auth(w http.ResponseWriter, r *http.Request) {
 	// Load request parameters
@@ -94,6 +94,28 @@ func IsAuthInvalid(w http.ResponseWriter, r *http.Request) bool {
 	right_sub := vars["book-id"]
 	if sub, _ := token.Claims().Subject(); sub != right_sub {
 		Log.WarningF("Wrong subject on JWT. Got %s Expected %s", sub, right_sub)
+		w.WriteHeader(http.StatusForbidden)
+		return true
+	}
+	return false
+}
+
+func IsAuthInvalid3(w http.ResponseWriter, r *http.Request, book_id *uuid.UUID) bool {
+	if IsAuthInvalid(w, r) {
+		return true
+	}
+	vars := mux.Vars(r)
+	book_id_str := book_id.String()
+	if book_id_str == "" || book_id.IsNil() {
+		err := book_id.UnmarshalText([]byte(vars["book-id"]))
+		if err != nil {
+			http.Error(w, err.Error(), 400)
+			return true
+		}
+		return false
+	}
+	if book_id_str != vars["book-id"] {
+		Log.WarningF("BookId in URL does not match JWT subjetc. URL -> %s JWT -> %s", book_id_str, vars["book-id"])
 		w.WriteHeader(http.StatusForbidden)
 		return true
 	}

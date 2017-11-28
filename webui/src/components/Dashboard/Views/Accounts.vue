@@ -3,33 +3,30 @@
     <div class="col-md-12">
       <div class="card">
         <div class="header">
-          <h4 class="title">{{$t('Add Currency or Asset')}}</h4>
+          <h4 class="title">{{$t('Add Account')}}</h4>
         </div>
         <div class="content">
           <form @submit.prevent>
             <div class="row">
               <div class="col-md-1"></div>
-              <div class="col-md-3">
+              <div class="col-md-5">
                 <div class="form-group">
-                  <label>{{$t('Code')}}</label>
-                  <input type="text" class="form-control border-input" v-model="newAssetCode">
+                  <label>{{$t('Parent')}}</label>
+                  <select class="form-control border-input" v-model="newAccountParent">
+                    <option value="00000000-0000-0000-0000-000000000000">{{$t('No parent account')}}</option>
+                    <option v-for="account in accounts" :value="account.ID">{{account.Name}}</option>
+                  </select>
                 </div>
               </div>
               <div class="col-md-5">
                 <div class="form-group">
                   <label>{{$t('Name')}}</label>
-                  <input type="text" class="form-control border-input" v-model="newAssetName">
-                </div>
-              </div>
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>{{$t('Decimal Places')}}</label>
-                  <input type="number" class="form-control border-input" v-model.number="newAssetPlaces">
+                  <input type="text" class="form-control border-input" v-model="newAccountName">
                 </div>
               </div>
             </div>
             <div class="text-center">
-              <button class="btn btn-info btn-fill btn-wd" :disabled="newAssetBtn == false" @click="addAsset">{{$t('Add Currency or Asset')}}</button>
+              <button class="btn btn-info btn-fill btn-wd" :disabled="newAccountBtn == false" @click="addAsset">{{$t('Add Account')}}</button>
             </div>
             <div class="clearfix">
             </div>
@@ -39,9 +36,14 @@
     </div>
     <div class="col-md-12">
       <div class="card">
-        <paper-table :title="$t(tblAssets.title)" :sub-title="$t(tblAssets.subTitle)" :data="tblAssets.data" :columns="tblAssets.columns" :click_callback="tblAssets.click_callback">
-
-        </paper-table>
+        <div class="header">
+          <h4 class="title">{{$t('Accounts')}}</h4>
+        </div>
+        <ul>
+          <li>kdljfdsa</li>
+        </ul>
+        <div class="header">
+        </div>
       </div>
     </div>
   </div>
@@ -60,25 +62,25 @@
     },
     methods: {
       addAsset () {
-        if (this.newAssetBtn === false) {
+        if (this.newAccountBtn === false) {
           return
         }
-        this.newAssetBtn = false
+        this.newAccountBtn = false
         // Data
         var fd = {}
-        fd['code'] = this.newAssetCode
-        fd['name'] = this.newAssetName
-        fd['places'] = this.newAssetPlaces
+        fd['code'] = this.newAccountCode
+        fd['name'] = this.newAccountName
+        fd['places'] = this.newAccountPlaces
         // Send request
         this.$http.put('books/{book-id}/assets', fd).then(response => { // Success
-          this.newAssetBtn = true
+          this.newAccountBtn = true
           window.book_id = fd['book_id']
-          this.newAssetCode = ''
-          this.newAssetName = ''
-          this.newAssetPlaces = 0
+          this.newAccountCode = ''
+          this.newAccountName = ''
+          this.newAccountPlaces = 0
         }, response => { // Error
           console.log('err', response)
-          this.newAssetBtn = true
+          this.newAccountBtn = true
           alert(response.bodyText)
         })
       },
@@ -96,13 +98,13 @@
     },
     data () {
       return {
-        newAssetCode: '',
-        newAssetName: '',
-        newAssetPlaces: 0,
-        newAssetBtn: true,
+        newAccountCode: '',
+        newAccountName: '',
+        newAccountPlaces: 0,
+        newAccountBtn: true,
         rawAssetsList: [],
         tblAssets: {
-          title: 'Currencies & Assets',
+          title: 'Accounts',
           subTitle: '',
           click_callback: function (obj) {
             console.log('Currency ' + obj.code + ' clicked')

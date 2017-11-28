@@ -34,6 +34,8 @@ func main() {
 		Log.Fatal("Failed to generate secure key:", err)
 		return
 	}
+	// Hack for dev
+	JWTKey = make([]byte, 16)
 
 	// Connect Database
 	wedge.DB, err = sql.Open("mysql", GetDBStringURI())
@@ -45,7 +47,7 @@ func main() {
 	router := mux.NewRouter().StrictSlash(true)
 	router.HandleFunc("/books", BooksList).Methods("GET")
 	router.HandleFunc("/books/{book-id}/assets", AssetsList).Methods("GET")
-	router.HandleFunc("/books/{book-id}/assets/{asset-code}", AssetsPut).Methods("PUT")
+	router.HandleFunc("/books/{book-id}/assets", AssetsPut).Methods("PUT")
 	router.HandleFunc("/auth", Auth).Methods("POST")
 	router.HandleFunc("/auth/test", AuthTest).Methods("POST")
 
@@ -58,6 +60,7 @@ func CorsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Headers", "*, Authorization, Content-Type")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH")
 		if r.Method != "OPTIONS" {
 			next.ServeHTTP(w, r)
 		}

@@ -6,6 +6,7 @@ import NotFound from '../components/GeneralViews/NotFoundPage.vue'
 // Admin pages
 import Overview from 'src/components/Dashboard/Views/Overview.vue'
 import Assets from 'src/components/Dashboard/Views/Assets.vue'
+import Accounts from 'src/components/Dashboard/Views/Accounts.vue'
 
 const routes = [
   {
@@ -30,7 +31,7 @@ const routes = [
       {
         path: 'Accounts',
         name: 'Accounts',
-        component: Overview
+        component: Accounts
       },
       {
         path: 'assets',

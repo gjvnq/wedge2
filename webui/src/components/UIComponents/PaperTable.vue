@@ -12,7 +12,7 @@
           <th v-for="column in columns">{{$t(column)}}</th>
         </thead>
         <tbody>
-          <tr v-for="item in data">
+          <tr v-for="item in data" @click="click_event(item)">
             <td v-for="column in columns" v-if="hasValue(item, column)">{{itemValue(item, column)}}</td>
           </tr>
         </tbody>
@@ -25,6 +25,7 @@
     props: {
       columns: Array,
       data: Array,
+      click_callback: Function,
       type: {
         type: String, // striped | hover
         default: 'striped'
@@ -50,6 +51,11 @@
       },
       itemValue (item, column) {
         return item[column.toLowerCase()]
+      },
+      click_event (obj) {
+        if (this.click_callback !== undefined) {
+          this.click_callback(obj)
+        }
       }
     }
   }

@@ -96,12 +96,12 @@ func Assets_GetById(asset_id uuid.UUID) (Asset, error, bool) {
 }
 
 func Assets_Update(asset *Asset) error {
-	err := DB.QueryRow("UPDATE `assets` SET `BookID` = ?, `Name` = ?, `Code` = ?, `Places` = ? WHERE `ID` = ?",
+	_, err := DB.Exec("UPDATE `assets` SET `BookID` = ?, `Name` = ?, `Code` = ?, `Places` = ? WHERE `ID` = ?",
 		asset.BookID,
 		asset.Name,
 		asset.Code,
 		asset.Places,
-		asset.ID).Scan()
+		asset.ID)
 	if err != nil {
 		Log.WarningF("Error when updating asset %s: %#v", asset.ID.String(), err)
 		return err
@@ -110,27 +110,18 @@ func Assets_Update(asset *Asset) error {
 }
 
 func Assets_Insert(asset *Asset) error {
-	err := DB.QueryRow("INSERT INTO `assets` (`ID`, `BookID`, `Name`, `Code`, `Places`) VALUES (?, ?, ?, ?, ?);",
+	if asset.ID.IsNil() {
+		asset.ID = uuid.NewV4()
+	}
+	_, err := DB.Exec("INSERT INTO `assets` (`ID`, `BookID`, `Name`, `Code`, `Places`) VALUES (?, ?, ?, ?, ?);",
 		asset.ID,
 		asset.BookID,
 		asset.Name,
 		asset.Code,
-		asset.Places).Scan()
+		asset.Places)
 	if err != nil {
-		Log.WarningF("Error when inserting asset %s: %#v", asset.ID.String(), err)
+		Log.WarningF("Error when inserting asset %+v: %#v", asset, err)
 		return err
-	}
-	return nil
-}
-
-func Assets_Put(asset *Asset) error {
-	if asset.ID.IsNil() {
-		asset.ID = uuid.NewV4()
-		return Assets_Insert(asset)
-	}
-	err := Assets_Update(asset)
-	if err != nil {
-		return Assets_Insert(asset)
 	}
 	return nil
 }

@@ -53,8 +53,16 @@ Object.defineProperty(Vue.prototype, '$Chartist', {
 /* eslint-disable no-new */
 Vue.http.options.root = '/api'
 Vue.http.options.root = '//localhost:8081/'
+Vue.http.options.book_id = 'no-book'
 Vue.http.options.emulateJSON = false
-Vue.http.headers.common['Authorization'] = 'Bearer'
+Vue.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('Authorization')
+Vue.http.options.book_id = localStorage.getItem('BookId')
+
+Vue.http.interceptors.push(function (request, next) {
+  request.url = request.url.replace('{book-id}', Vue.http.options.book_id)
+  next()
+})
+
 new Vue({
   el: '#app',
   render: h => h(App),

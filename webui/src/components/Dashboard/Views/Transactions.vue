@@ -75,24 +75,21 @@
     </div>
     <div class="col-md-12">
       <div class="card">
-        {{hack}}
+        -> {{accountsList}}
       </div>
     </div>
   </div>
 </template>
 <script>
-  import PaperTable from 'components/UIComponents/PaperTable.vue'
+  import appData from '@/appData'
   import TreeView from 'components/UIComponents/TreeView.vue'
-  const tableColumns = ['Code', 'Name', 'Last Value', '']
-  const tableData = []
 
   export default {
     components: {
-      PaperTable,
       TreeView
     },
     beforeMount () {
-      this.$appData.accounts.first()
+      appData.updateAccounts(this)
     },
     methods: {
       addAccount () {
@@ -133,9 +130,9 @@
         })
       }
     },
+    props: ['accountsList'],
     data () {
       return {
-        accountsList: [],
         transactionName: '',
         transactionDate: '',
         transactionBtn: true,
@@ -143,17 +140,7 @@
         movementAsset: '00000000-0000-0000-0000-000000000000',
         movementDate: '',
         movementStatus: '',
-        movementValue: 0,
-        accountsTree: {},
-        tblAccounts: {
-          title: 'Accounts',
-          subTitle: '',
-          click_callback: function (obj) {
-            console.log('Currency ' + obj.code + ' clicked')
-          },
-          columns: [...tableColumns],
-          data: [...tableData]
-        }
+        movementValue: 0
       }
     }
   }

@@ -9,7 +9,7 @@
     <div class="main-panel">
       <top-navbar></top-navbar>
 
-      <dashboard-content @click.native="toggleSidebar">
+      <dashboard-content :globoids="globoids" @click.native="toggleSidebar">
 
       </dashboard-content>
 
@@ -34,6 +34,14 @@
       toggleSidebar () {
         if (this.$sidebar.showSidebar) {
           this.$sidebar.displaySidebar(false)
+        }
+      }
+    },
+    data () {
+      return {
+        globoids: {
+          accountsList: [1, 2, 3],
+          accountsTree: {}
         }
       }
     }

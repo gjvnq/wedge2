@@ -6,7 +6,6 @@ import VueResource from 'vue-resource'
 // Plugins
 import GlobalComponents from './globalComponents'
 import GlobalDirectives from './globalDirectives'
-import GlobalDataHelpers from './globalDataHelpers'
 import Notifications from './components/UIComponents/NotificationPlugin'
 import SideBar from './components/UIComponents/SidebarPlugin'
 import App from './App'
@@ -31,7 +30,6 @@ Vue.use(GlobalComponents)
 Vue.use(GlobalDirectives)
 Vue.use(Notifications)
 Vue.use(SideBar)
-Vue.use(GlobalDataHelpers)
 
 // configure router
 const router = new VueRouter({

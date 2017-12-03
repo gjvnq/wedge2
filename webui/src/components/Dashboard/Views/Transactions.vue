@@ -116,7 +116,7 @@
         })
       },
       updateAccounts () {
-        this.$appData.accounts.update()
+        this.$parent.$parent.updateAccounts()
       }
     },
     props: ['accountsList', 'assetsList'],

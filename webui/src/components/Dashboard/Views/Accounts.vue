@@ -49,14 +49,10 @@
   </div>
 </template>
 <script>
-  import PaperTable from 'components/UIComponents/PaperTable.vue'
   import TreeView from 'components/UIComponents/TreeView.vue'
-  const tableColumns = ['Code', 'Name', 'Last Value', '']
-  const tableData = []
 
   export default {
     components: {
-      PaperTable,
       TreeView
     },
     beforeMount () {
@@ -87,38 +83,18 @@
         })
       },
       updateAccounts () {
-        // Send request
-        this.$http.get('books/{book-id}/accounts').then(response => { // Success
-          this.accountsList = response.body
-        }, response => { // Error
-          console.log('err', response)
-        })
-        // Send request
-        this.$http.get('books/{book-id}/accounts-tree').then(response => { // Success
-          this.accountsTree = response.body
-        }, response => { // Error
-          console.log('err', response)
-        })
+        console.log(this.$parent.$parent.updateAccounts())
+        this.$parent.$parent.updateAccounts()
       }
     },
     data () {
       return {
-        accountsList: [],
         newAccountName: '',
         newAccountParent: '00000000-0000-0000-0000-000000000000',
-        newAccountBtn: true,
-        accountsTree: {},
-        tblAccounts: {
-          title: 'Accounts',
-          subTitle: '',
-          click_callback: function (obj) {
-            console.log('Currency ' + obj.code + ' clicked')
-          },
-          columns: [...tableColumns],
-          data: [...tableData]
-        }
+        newAccountBtn: true
       }
-    }
+    },
+    props: ['accountsList', 'accountsTree']
   }
 
 </script>

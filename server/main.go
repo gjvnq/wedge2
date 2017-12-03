@@ -48,6 +48,9 @@ func main() {
 	router.HandleFunc("/books", BooksList).Methods("GET")
 	router.HandleFunc("/books/{book-id}/assets", AssetsList).Methods("GET")
 	router.HandleFunc("/books/{book-id}/assets", AssetsPut).Methods("PUT")
+	router.HandleFunc("/books/{book-id}/accounts", AccountList).Methods("GET")
+	router.HandleFunc("/books/{book-id}/accounts-tree", AccountTree).Methods("GET")
+	router.HandleFunc("/books/{book-id}/accounts", AccountSet).Methods("PUT")
 	router.HandleFunc("/auth", Auth).Methods("POST")
 	router.HandleFunc("/auth/test", AuthTest).Methods("POST")
 

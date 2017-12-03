@@ -10,10 +10,7 @@
     <div class="sidebar-wrapper" id="style-3">
       <div class="logo">
         <a href="#" class="simple-text">
-            <div class="logo-img">
-                <img src="static/img/vue-logo.png" alt="">
-            </div>
-          Paper Dashboard
+          <h4 style="margin: 0">wedge²</h4>
         </a>
       </div>
       <slot>

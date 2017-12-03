@@ -51,7 +51,7 @@ func Books_All(redact bool) ([]Book, error) {
 
 func Assets_InBook(book_id uuid.UUID) ([]Asset, error) {
 	assets := make([]Asset, 0)
-	rows, err := DB.Query("SELECT `ID`, `BookID`, `Name`, `Code`, `Places` FROM `assets` WHERE `BookID` = ?", book_id)
+	rows, err := DB.Query("SELECT `ID`, `BookID`, `Name`, `Code`, `Places` FROM `assets` WHERE `BookID` = ? ORDER BY `Code`", book_id)
 	if err == sql.ErrNoRows {
 		return nil, err
 	}
@@ -121,6 +121,50 @@ func Assets_Insert(asset *Asset) error {
 		asset.Places)
 	if err != nil {
 		Log.WarningF("Error when inserting asset %+v: %#v", asset, err)
+		return err
+	}
+	return nil
+}
+
+func Accounts_InBook(book_id uuid.UUID) ([]Account, error) {
+	accounts := make([]Account, 0)
+	rows, err := DB.Query("SELECT `ID`, `ParentID`, `Name`, `BookID` FROM `accounts` WHERE `BookID` = ? ORDER BY `Name`", book_id)
+	if err == sql.ErrNoRows {
+		return nil, err
+	}
+	if err != nil {
+		Log.WarningF("Error when loading accounts: %#v", err)
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		account := Account{}
+		err = rows.Scan(
+			&account.ID,
+			&account.ParentID,
+			&account.Name,
+			&account.BookID)
+		if err != nil {
+			Log.WarningF("Error when loading account %s: %#v", account.ID.String(), err)
+			return nil, err
+		}
+		accounts = append(accounts, account)
+	}
+	return accounts, nil
+}
+
+func Accounts_Set(account *Account) error {
+	// If the ID is nil, assume it is a new account and give it a new ID
+	if account.ID.IsNil() {
+		account.ID = uuid.NewV4()
+	}
+	_, err := DB.Exec("REPLACE INTO `accounts` VALUE (?, ?, ?, ?)",
+		account.ID,
+		account.ParentID,
+		account.Name,
+		account.BookID)
+	if err != nil {
+		Log.WarningF("Error when updating account %s %s: %#v", account.ID, account.Name, err)
 		return err
 	}
 	return nil

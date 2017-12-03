@@ -14,7 +14,7 @@
                   <label>{{$t('Parent')}}</label>
                   <select class="form-control border-input" v-model="newAccountParent">
                     <option value="00000000-0000-0000-0000-000000000000">{{$t('No parent account')}}</option>
-                    <option v-for="account in accounts" :value="account.ID">{{account.Name}}</option>
+                    <option v-for="account in accountsList" :value="account.id">{{account.name}}</option>
                   </select>
                 </div>
               </div>
@@ -26,7 +26,7 @@
               </div>
             </div>
             <div class="text-center">
-              <button class="btn btn-info btn-fill btn-wd" :disabled="newAccountBtn == false" @click="addAsset">{{$t('Add Account')}}</button>
+              <button class="btn btn-info btn-fill btn-wd" :disabled="newAccountBtn == false" @click="addAccount">{{$t('Add Account')}}</button>
             </div>
             <div class="clearfix">
             </div>
@@ -39,9 +39,9 @@
         <div class="header">
           <h4 class="title">{{$t('Accounts')}}</h4>
         </div>
-        <ul>
-          <li>kdljfdsa</li>
-        </ul>
+        <p></p>
+        <tree-view :model="accountsTree">
+        </tree-view>
         <div class="header">
         </div>
       </div>
@@ -50,47 +50,52 @@
 </template>
 <script>
   import PaperTable from 'components/UIComponents/PaperTable.vue'
+  import TreeView from 'components/UIComponents/TreeView.vue'
   const tableColumns = ['Code', 'Name', 'Last Value', '']
   const tableData = []
 
   export default {
     components: {
-      PaperTable
+      PaperTable,
+      TreeView
     },
     beforeMount () {
-      this.updateAssets()
+      this.updateAccounts()
     },
     methods: {
-      addAsset () {
+      addAccount () {
         if (this.newAccountBtn === false) {
           return
         }
         this.newAccountBtn = false
         // Data
         var fd = {}
-        fd['code'] = this.newAccountCode
         fd['name'] = this.newAccountName
-        fd['places'] = this.newAccountPlaces
+        fd['parent_id'] = this.newAccountParent
+        console.log(fd)
         // Send request
-        this.$http.put('books/{book-id}/assets', fd).then(response => { // Success
+        this.$http.put('books/{book-id}/accounts', fd).then(response => { // Success
           this.newAccountBtn = true
           window.book_id = fd['book_id']
-          this.newAccountCode = ''
           this.newAccountName = ''
-          this.newAccountPlaces = 0
+          this.updateAccounts()
         }, response => { // Error
           console.log('err', response)
           this.newAccountBtn = true
           alert(response.bodyText)
+          this.updateAccounts()
         })
       },
-      updateAssets () {
+      updateAccounts () {
         // Send request
-        this.$http.get('books/{book-id}/assets').then(response => { // Success
-          this.rawAssetsList = response.body
-          this.tblAssets.data = this.rawAssetsList
-          console.log('---')
-          console.log(this.tblAssets.data)
+        this.$http.get('books/{book-id}/accounts').then(response => { // Success
+          this.accountsList = response.body
+        }, response => { // Error
+          console.log('err', response)
+        })
+        // Send request
+        this.$http.get('books/{book-id}/accounts-tree').then(response => { // Success
+          this.accountsTree = response.body
         }, response => { // Error
           console.log('err', response)
         })
@@ -98,12 +103,12 @@
     },
     data () {
       return {
-        newAccountCode: '',
+        accountsList: [],
         newAccountName: '',
-        newAccountPlaces: 0,
+        newAccountParent: '00000000-0000-0000-0000-000000000000',
         newAccountBtn: true,
-        rawAssetsList: [],
-        tblAssets: {
+        accountsTree: {},
+        tblAccounts: {
           title: 'Accounts',
           subTitle: '',
           click_callback: function (obj) {
@@ -117,6 +122,3 @@
   }
 
 </script>
-<style>
-
-</style>

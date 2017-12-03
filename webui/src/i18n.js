@@ -20,6 +20,8 @@ export const messages = {
     'Currencies & Assets': 'Bens & Moedas',
     'Failed to comunicate with the server :-(': 'Falha ao comunicar com o servidor :-(',
     'Wrong password :-(': 'Senha errada :-(',
-    'No such book :-(': 'Livro não existe :-('
+    'No such book :-(': 'Livro não existe :-(',
+    'No parent account': 'Nenhuma conta pai',
+    'Add Account': 'Adicionar Conta'
   }
 }

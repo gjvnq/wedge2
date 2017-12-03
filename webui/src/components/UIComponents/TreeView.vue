@@ -17,6 +17,9 @@
     props: {
       model: Object
     },
+    beforeMount () {
+      this.$appData.accounts.first()
+    },
     data: function () {
       return {}
     },

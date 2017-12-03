@@ -7,6 +7,7 @@ import NotFound from '../components/GeneralViews/NotFoundPage.vue'
 import Overview from 'src/components/Dashboard/Views/Overview.vue'
 import Assets from 'src/components/Dashboard/Views/Assets.vue'
 import Accounts from 'src/components/Dashboard/Views/Accounts.vue'
+import Transactions from 'src/components/Dashboard/Views/Transactions.vue'
 
 const routes = [
   {
@@ -41,7 +42,7 @@ const routes = [
       {
         path: 'transactions',
         name: 'Transactions',
-        component: Overview
+        component: Transactions
       }
     ]
   },

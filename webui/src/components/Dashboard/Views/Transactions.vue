@@ -145,7 +145,6 @@
         movementStatus: '',
         movementValue: 0,
         accountsTree: {},
-        hack: this.$appData.accounts.tree,
         tblAccounts: {
           title: 'Accounts',
           subTitle: '',

@@ -28,8 +28,13 @@ export default function install (Vue, options) {
 
   Vue.prototype.$appData = {}
   Vue.prototype.$appData.accounts = {}
-  Vue.prototype.$appData.accounts.tree = Vue.appData.accounts.tree
-  Vue.prototype.$appData.accounts.list = Vue.appData.accounts.list
+  Vue.prototype.$appData.accounts.tree = function () {
+    console.log('hi')
+    return Vue.appData.accounts.tree
+  }
+  Vue.prototype.$appData.accounts.list = function () {
+    return Vue.appData.accounts.list
+  }
   Vue.prototype.$appData.accounts.first = function () {
     if (Vue.appData.accounts.tree === {} || Vue.appData.accounts.list.length === 0) {
       if (!Vue.appData.accounts.loading) {

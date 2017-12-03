@@ -29,7 +29,9 @@
               <div class="col-md-2">
                 <div class="form-group">
                   <label>{{$t('Account')}}</label>
-                  <input type="text" class="form-control border-input" v-model="movementAccount">
+                  <select class="form-control border-input" v-model="movementAccount">
+                    <option v-for="account in accountsList" :value="account.id">{{account.name}}</option>
+                  </select>
                 </div>
               </div>
               <div class="col-md-2">
@@ -41,7 +43,9 @@
               <div class="col-md-2">
                 <div class="form-group">
                   <label>{{$t('Currency or Asset')}}</label>
-                  <input type="text" class="form-control border-input" v-model="movementAsset">
+                  <select class="form-control border-input" v-model="movementAsset">
+                    <option v-for="asset in assetsList" :value="asset.id">{{asset.name}}</option>
+                  </select>
                 </div>
               </div>
               <div class="col-md-2">
@@ -75,21 +79,17 @@
     </div>
     <div class="col-md-12">
       <div class="card">
-        -> {{accountsList}}
+        a
       </div>
     </div>
   </div>
 </template>
 <script>
-  import appData from '@/appData'
   import TreeView from 'components/UIComponents/TreeView.vue'
 
   export default {
     components: {
       TreeView
-    },
-    beforeMount () {
-      appData.updateAccounts(this)
     },
     methods: {
       addAccount () {
@@ -107,30 +107,19 @@
           this.transactionBtn = true
           window.book_id = fd['book_id']
           this.transactionName = ''
-          this.$appData.accounts.update()
+          this.updateAccounts
         }, response => { // Error
           console.log('err', response)
           this.transactionBtn = true
           alert(response.bodyText)
-          this.$appData.accounts.update()
+          this.updateAccounts
         })
       },
       updateAccounts () {
-        // Send request
-        this.$http.get('books/{book-id}/accounts').then(response => { // Success
-          this.accountsList = response.body
-        }, response => { // Error
-          console.log('err', response)
-        })
-        // Send request
-        this.$http.get('books/{book-id}/accounts-tree').then(response => { // Success
-          this.accountsTree = response.body
-        }, response => { // Error
-          console.log('err', response)
-        })
+        this.$appData.accounts.update()
       }
     },
-    props: ['accountsList'],
+    props: ['accountsList', 'assetsList'],
     data () {
       return {
         transactionName: '',

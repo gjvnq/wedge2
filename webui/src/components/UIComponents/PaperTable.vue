@@ -10,10 +10,12 @@
       <table class="table" :class="tableClass">
         <thead>
           <th v-for="column in columns">{{$t(column)}}</th>
+          <th></th>
         </thead>
         <tbody>
-          <tr v-for="item in data" @click="click_event(item)">
-            <td v-for="column in columns" v-if="hasValue(item, column)">{{itemValue(item, column)}}</td>
+          <tr v-for="item in data" :class="trClass" @click="click_event(item)">
+            <td v-for="(column, col_index) in columns" :class="itemClass(col_index)" v-if="hasValue(item, column)">{{itemValue(item, column)}}</td>
+            <td v-html="itemValue(item, '_extra')"></td>
           </tr>
         </tbody>
       </table>
@@ -24,11 +26,12 @@
   export default {
     props: {
       columns: Array,
+      columnsStyles: Array,
       data: Array,
       click_callback: Function,
       type: {
         type: String, // striped | hover
-        default: 'striped'
+        default: 'hover'
       },
       title: {
         type: String,
@@ -37,12 +40,17 @@
       subTitle: {
         type: String,
         default: ''
-
       }
     },
     computed: {
       tableClass () {
         return `table-${this.type}`
+      },
+      trClass () {
+        if (this.click_callback !== undefined) {
+          return 'click-cursor'
+        }
+        return ''
       }
     },
     methods: {
@@ -51,6 +59,12 @@
       },
       itemValue (item, column) {
         return item[column.toLowerCase()]
+      },
+      itemClass (index) {
+        if (this.columnsStyles === undefined) {
+          return ''
+        }
+        return this.columnsStyles[index]
       },
       click_event (obj) {
         if (this.click_callback !== undefined) {

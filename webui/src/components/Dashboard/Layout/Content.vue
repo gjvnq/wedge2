@@ -3,7 +3,7 @@
     <div class="container-fluid">
         <transition name="fade" mode="out-in">
           <!-- your content here -->
-          <router-view v-bind="globoids"></router-view>
+          <router-view :globoids="globoids" v-bind="globoids"></router-view>
         </transition>
     </div>
   </div>

@@ -83,7 +83,7 @@
         })
       },
       updateAccounts () {
-        console.log(this.$parent.$parent.updateAccounts())
+        console.log(this.$parent.$parent.updateAccounts)
         this.$parent.$parent.updateAccounts()
       }
     },

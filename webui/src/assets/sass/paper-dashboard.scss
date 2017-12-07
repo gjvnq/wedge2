@@ -32,9 +32,6 @@
 @import "paper/chartist";
 @import "paper/responsive";
 
-
-
-
 // Hacks
 .bg-nude {
 	background-color: $bg-nude
@@ -44,4 +41,23 @@
 }
 .color-white {
 	color: $white-color
+}
+
+div.form-group > label {
+	overflow: hidden; 
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	margin-bottom: 0;
+}
+
+input, select {
+	font-family: monospace;
+}
+
+.mono {
+	font-family: monospace;
+}
+
+.click-cursor {
+	cursor: pointer;
 }

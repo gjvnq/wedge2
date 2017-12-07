@@ -39,8 +39,7 @@
     </div>
     <div class="col-md-12">
       <div class="card">
-        <paper-table :title="$t(tblAssets.title)" :sub-title="$t(tblAssets.subTitle)" :data="tblAssets.data" :columns="tblAssets.columns" :click_callback="tblAssets.click_callback">
-
+        <paper-table :title="$t(tblAssets.title)" :sub-title="$t(tblAssets.subTitle)" :data="tblAssets.data" :columns="tblAssets.columns" :columnsStyles="tblAssets.columnsStyles" :click_callback="tblAssets.click_callback">
         </paper-table>
       </div>
     </div>
@@ -48,8 +47,8 @@
 </template>
 <script>
   import PaperTable from 'components/UIComponents/PaperTable.vue'
-  const tableColumns = ['Code', 'Name', 'Last Value', '']
-  const tableData = []
+  const tableColumns = ['Code', 'Name', 'Last Value']
+  const tableColumnsStyle = ['mono', '', '']
 
   export default {
     components: {
@@ -76,6 +75,7 @@
           this.newAssetCode = ''
           this.newAssetName = ''
           this.newAssetPlaces = 0
+          this.updateAssets()
         }, response => { // Error
           console.log('err', response)
           this.newAssetBtn = true
@@ -83,17 +83,18 @@
         })
       },
       updateAssets () {
-        // Send request
-        this.$http.get('books/{book-id}/assets').then(response => { // Success
+        console.log(this.$parent.$parent.updateAssets)
+        this.$parent.$parent.updateAssets(response => {
+          console.log('callbacked')
+          for (var i = 0; i < response.body.length; i++) {
+            response.body[i]._extra = '<span class="ti-pencil"></span>'
+          }
           this.rawAssetsList = response.body
           this.tblAssets.data = this.rawAssetsList
-          console.log('---')
-          console.log(this.tblAssets.data)
-        }, response => { // Error
-          console.log('err', response)
         })
       }
     },
+    props: ['assetsList'],
     data () {
       return {
         newAssetCode: '',
@@ -108,7 +109,8 @@
             console.log('Currency ' + obj.code + ' clicked')
           },
           columns: [...tableColumns],
-          data: [...tableData]
+          data: [],
+          columnsStyles: [...tableColumnsStyle]
         }
       }
     }

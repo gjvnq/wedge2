@@ -101,12 +101,12 @@ func (ld LDate) is_valid() bool {
 }
 
 func (ld LDate) String() string {
-	return fmt.Sprintf("%04d-%02d-%02dLD", ld.year, ld.month, ld.day)
+	return fmt.Sprintf("%04d-%02d-%02d", ld.year, ld.month, ld.day)
 }
 
 func Limit99(v int) int {
 	if v < 0 {
-		return v
+		return 0
 	}
 	if v > 99 {
 		return 99

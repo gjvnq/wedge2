@@ -57,12 +57,15 @@
           this.globoids.accountsLoading = false
         })
       },
-      updateAssets () {
+      updateAssets (callback) {
         // Send request
         this.globoids.assetsLoading = true
         this.$http.get('books/{book-id}/assets').then(response => { // Success
           this.globoids.assetsList = response.body
           this.globoids.assetsLoading = false
+          if (typeof callback === 'function') {
+            callback(response)
+          }
         }, response => { // Error
           this.globoids.assetsLoading = false
         })
@@ -72,8 +75,10 @@
       return {
         globoids: {
           accountsLoading: false,
-          accountsList: [1, 2, 3],
-          accountsTree: {}
+          accountsList: [],
+          accountsTree: {},
+          assetsLoading: false,
+          assetsList: []
         }
       }
     }

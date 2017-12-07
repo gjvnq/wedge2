@@ -24,52 +24,19 @@
             </div>
             <hr>
             <h4 class="title">{{$t('Movements')}}</h4>
-            <div class="row">
-              <div class="col-md-1"></div>
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>{{$t('Account')}}</label>
-                  <select class="form-control border-input" v-model="movementAccount">
-                    <option v-for="account in accountsList" :value="account.id">{{account.name}}</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>{{$t('Value')}}</label>
-                  <input type="text" class="form-control border-input" v-model="movementValue">
-                </div>
-              </div>
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>{{$t('Currency or Asset')}}</label>
-                  <select class="form-control border-input" v-model="movementAsset">
-                    <option v-for="asset in assetsList" :value="asset.id">{{asset.name}}</option>
-                  </select>
-                </div>
-              </div>
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>{{$t('Date')}}</label>
-                  <input type="date" class="form-control border-input" v-model="movementDate">
-                </div>
-              </div>
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>{{$t('Status')}}</label>
-                  <select class="form-control border-input" v-model="movementStatus">
-                    <option value="P">{{$t('Planned')}}</option>
-                    <option value="D">{{$t('Done')}}</option>
-                    <option value="C">{{$t('Cancelled')}}</option>
-                  </select>
-                </div>
-              </div>
+            <movement :accountsList="accountsList" :assetsList="assetsList" v-for="(movement, index) in movements" v-model="movements[index]"/>
+            <div class="text-center">
+              <button class="btn btn-info btn-fill btn-wd" :disabled="transactionBtn == false" @click="addAccount">{{$t('Add Movement')}}</button>
             </div>
-
             <hr>
             <h4 class="title">{{$t('Items')}}</h4>
+            <item :assetsList="assetsList" v-for="(item, index) in items" v-model="items[index]"/>
             <div class="text-center">
-              <button class="btn btn-info btn-fill btn-wd" :disabled="transactionBtn == false" @click="addAccount">{{$t('Add Account')}}</button>
+              <button class="btn btn-info btn-fill btn-wd" :disabled="transactionBtn == false" @click="addAccount">{{$t('Add Item')}}</button>
+            </div>
+            <hr>
+            <div class="text-center">
+              <button class="btn btn-info btn-fill btn-wd" :disabled="transactionBtn == false" @click="addAccount">{{$t('Save')}}</button>
             </div>
             <div class="clearfix">
             </div>
@@ -86,10 +53,14 @@
 </template>
 <script>
   import TreeView from 'components/UIComponents/TreeView.vue'
+  import movement from 'components/UIComponents/Inputs/movement.vue'
+  import item from 'components/UIComponents/Inputs/item.vue'
 
   export default {
     components: {
-      TreeView
+      TreeView,
+      movement,
+      item
     },
     methods: {
       addAccount () {
@@ -116,7 +87,7 @@
         })
       },
       updateAccounts () {
-        this.$parent.$parent.updateAccounts()
+        this.$root.$children[0].$children[0].updateAccounts()
       }
     },
     props: ['accountsList', 'assetsList'],
@@ -125,11 +96,12 @@
         transactionName: '',
         transactionDate: '',
         transactionBtn: true,
-        movementAccount: '00000000-0000-0000-0000-000000000000',
-        movementAsset: '00000000-0000-0000-0000-000000000000',
-        movementDate: '',
-        movementStatus: '',
-        movementValue: 0
+        movements: [
+          {}
+        ],
+        items: [
+          {}
+        ]
       }
     }
   }

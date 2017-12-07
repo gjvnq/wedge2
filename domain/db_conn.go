@@ -51,7 +51,7 @@ func Books_All(redact bool) ([]Book, error) {
 
 func Assets_InBook(book_id uuid.UUID) ([]Asset, error) {
 	assets := make([]Asset, 0)
-	rows, err := DB.Query("SELECT `ID`, `BookID`, `Name`, `Code`, `Places` FROM `assets` WHERE `BookID` = ? ORDER BY `Code`", book_id)
+	rows, err := DB.Query("SELECT `ID`, `BookID`, `Name`, `Code`, `Places` FROM `assets` WHERE `BookID` = ? ORDER BY CHAR_LENGTH(`Code`), `Code`", book_id)
 	if err == sql.ErrNoRows {
 		return nil, err
 	}

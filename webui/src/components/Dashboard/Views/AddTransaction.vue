@@ -88,36 +88,47 @@
       addItem () {
         this.items.push({})
       },
-      save () {
-      },
       deleteItem (index) {
         this.items.splice(index, 1)
       },
       deleteMovement (index) {
         this.movements.splice(index, 1)
       },
-      addAccount () {
-        if (this.transactionBtn === false) {
-          return
-        }
-        this.transactionBtn = false
+      save () {
+        // if (this.transactionBtn === false) {
+        //   return
+        // }
+        // this.transactionBtn = false
         // Data
         var fd = {}
         fd['name'] = this.transactionName
-        fd['parent_id'] = this.transactionParent
+        fd['local_date'] = this.transactionDate
+        fd['movements'] = []
+        for (let movement of this.movements) {
+          var fd2 = {}
+          fd2['account_id'] = movement.account
+          fd2['asset_id'] = movement.asset
+          fd2['amount'] = movement.amount
+          fd2['status'] = movement.status
+          fd2['local_date'] = movement.date
+          fd2['amount'] = movement.amount
+          fd['movements'].push(fd2)
+          console.log(fd2)
+        }
+        fd['items'] = []
         console.log(fd)
-        // Send request
-        this.$http.put('books/{book-id}/accounts', fd).then(response => { // Success
-          this.transactionBtn = true
-          window.book_id = fd['book_id']
-          this.transactionName = ''
-          this.updateAccounts
-        }, response => { // Error
-          console.log('err', response)
-          this.transactionBtn = true
-          alert(response.bodyText)
-          this.updateAccounts
-        })
+        // // Send request
+        // this.$http.put('books/{book-id}/accounts', fd).then(response => { // Success
+        //   this.transactionBtn = true
+        //   window.book_id = fd['book_id']
+        //   this.transactionName = ''
+        //   this.updateAccounts
+        // }, response => { // Error
+        //   console.log('err', response)
+        //   this.transactionBtn = true
+        //   alert(response.bodyText)
+        //   this.updateAccounts
+        // })
       },
       updateAccounts () {
         this.$root.$children[0].$children[0].updateAccounts()

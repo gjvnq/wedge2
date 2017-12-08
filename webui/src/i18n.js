@@ -1,5 +1,6 @@
 export const messages = {
   pt: {
+    Add: 'Adicionar',
     Login: 'Entrar',
     Password: 'Senha',
     Book: 'Livro',
@@ -23,6 +24,8 @@ export const messages = {
     Save: 'Salvar',
     Quantity: 'Quantidade',
     Status: 'Status',
+    'New Transaction': 'Nova Transação',
+    'The save button is at the top of this page': 'O botão de salvar está no topo desta página',
     'Period Start': 'Início do Período',
     'Period End': 'Fim do Período',
     'Tags (comma separated)': 'Tags (separadas por vírgulas)',

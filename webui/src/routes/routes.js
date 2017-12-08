@@ -8,6 +8,7 @@ import Overview from 'src/components/Dashboard/Views/Overview.vue'
 import Assets from 'src/components/Dashboard/Views/Assets.vue'
 import Accounts from 'src/components/Dashboard/Views/Accounts.vue'
 import Transactions from 'src/components/Dashboard/Views/Transactions.vue'
+import AddTransaction from 'src/components/Dashboard/Views/AddTransaction.vue'
 
 const routes = [
   {
@@ -43,6 +44,11 @@ const routes = [
         path: 'transactions',
         name: 'Transactions',
         component: Transactions
+      },
+      {
+        path: 'transactions/add',
+        name: 'Add Transaction',
+        component: AddTransaction
       }
     ]
   },

@@ -24,7 +24,7 @@
     <div class="col-md-1">
       <div class="form-group">
         <div style="height: 27px"></div>
-        <button class="btn btn-danger btn-fill"><span class="ti-trash"></span></button>
+        <button class="btn btn-danger btn-fill" @click="deleteMe"><span class="ti-trash"></span></button>
       </div>
     </div>
   </div>
@@ -42,6 +42,8 @@
     props: {
       assetsList: Array,
       accountsList: Array,
+      deleteCallback: Function,
+      index: Number,
       value: {
         account: String,
         ammount: Number,
@@ -53,6 +55,11 @@
     methods: {
       updateValue () {
         this.$emit('input', this.value)
+      },
+      deleteMe () {
+        if (this.deleteCallback !== undefined) {
+          this.deleteCallback(this.index)
+        }
       }
     },
     data () {

@@ -13,7 +13,7 @@
           <input type="text" class="form-control border-input" v-model.number="value.unit" @input="updateValue($event.target.value)">
         </div>
       </div>
-      <div class="col-md-1">
+      <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Quantity')}}</label>
           <input type="text" class="form-control border-input" v-model.number="value.quantity" @input="updateValue($event.target.value)">
@@ -52,7 +52,7 @@
       <div class="col-md-1">
         <div class="form-group">
           <div style="height: 27px"></div>
-          <button class="btn btn-danger btn-fill"><span class="ti-trash"></span></button>
+          <button class="btn btn-danger btn-fill" @click="deleteMe"><span class="ti-trash"></span></button>
         </div>
       </div>
     </div>
@@ -73,6 +73,8 @@
     props: {
       assetsList: Array,
       accountsList: Array,
+      deleteCallback: Function,
+      index: Number,
       value: {
         name: String,
         unit: Number,
@@ -86,6 +88,11 @@
     methods: {
       updateValue () {
         this.$emit('input', this.value)
+      },
+      deleteMe () {
+        if (this.deleteCallback !== undefined) {
+          this.deleteCallback(this.index)
+        }
       }
     },
     data () {

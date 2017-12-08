@@ -11,10 +11,8 @@ type Item struct {
 	AssetID       uuid.UUID `json:"asset_id"`
 	TransactionID uuid.UUID `json:"transaction_id"`
 	Name          string    `json:"name"`
-	GenericName   string    `json:"generic_name"`
-	Unit          string    `json:"unit"`
 	UnitCost      int       `json:"unit_cost"`
-	Qty           float64   `json:"qty"`
+	Qty           float64   `json:"quantity"`
 	TotalCost     int       `json:"total_cost"`
 	PeriodEnd     LDate     `json:"period_end"`
 	PeriodStart   LDate     `json:"period_start"`

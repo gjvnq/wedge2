@@ -1,25 +1,25 @@
 <template>
   <div class="row">
     <div class="col-md-2">
-      <selector label="Account" v-model="value.account" :list="accountsList"/>
+      <selector label="Account" v-model="value.account" :list="accountsList" @change="onChange"/>
     </div>
     <div class="col-md-2">
       <div class="form-group">
         <label>{{$t('Value')}}</label>
-        <input type="text" class="form-control border-input" :value.number="value.amount" @input="update('amount', $event.target.value)">
+        <input type="text" class="form-control border-input" v-model.number="value.amount" @change="onChange"/>
       </div>
     </div>
     <div class="col-md-3">
-      <asset-selector label="Currency or Asset" v-model="value.asset" :list="assetsList"/>
+      <asset-selector label="Currency or Asset" v-model="value.asset" :list="assetsList" @change="onChange"/>
     </div>
     <div class="col-md-2">
       <div class="form-group">
         <label>{{$t('Date')}}</label>
-        <input type="date" class="form-control border-input" v-model="value.date"/>
+        <input type="date" class="form-control border-input" v-model="value.date" @change="onChange"/>
       </div>
     </div>
     <div class="col-md-2">
-      <selector label="Status" v-model="value.status" :list="statusList"/>
+      <selector label="Status" v-model="value.status" :list="statusList" @change="onChange"/>
     </div>
     <div class="col-md-1">
       <div class="form-group">
@@ -68,15 +68,8 @@
       }
     },
     methods: {
-      update (field, value) {
-        if (field === 'amount') {
-          value = Number(value)
-        }
-
-        console.log(field, value)
-        this.$set(this.value, field, value)
-        console.log('input', this.value)
-        this.$emit('input', this.value)
+      onChange (e) {
+        this.$emit('change', this.value)
       },
       deleteMe () {
         if (this.deleteCallback !== undefined) {

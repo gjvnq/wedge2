@@ -4,49 +4,49 @@
       <div class="col-md-3">
         <div class="form-group">
           <label>{{$t('Name')}}</label>
-          <input type="text" class="form-control border-input" v-model="value.name" @input="updateValue($event.target.value)">
+          <input type="text" class="form-control border-input" v-model="value.name">
         </div>
       </div>
       <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Unit Value')}}</label>
-          <input type="text" class="form-control border-input" v-model.number="value.unit" @input="updateValue($event.target.value)">
+          <input type="text" class="form-control border-input" v-model.number="value.unit_cost" @input="calcFromUnit">
         </div>
       </div>
       <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Quantity')}}</label>
-          <input type="text" class="form-control border-input" v-model.number="value.quantity" @input="updateValue($event.target.value)">
+          <input type="text" class="form-control border-input" v-model.number="value.quantity" @input="calcFromQuantity">
         </div>
       </div>
       <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Total Value')}}</label>
-          <input type="text" class="form-control border-input" v-model.number="value.total" @input="updateValue($event.target.value)">
+          <input type="text" class="form-control border-input" v-model.number="value.total_cost" @input="calcFromTotal">
         </div>
       </div>
 
       <div class="col-md-3">
-        <asset-selector label="Currency or Asset" v-model="value.asset" :list="assetsList" @input="updateValue($event)"/>
+        <asset-selector label="Currency or Asset" v-model="value.asset" :list="assetsList"/>
       </div>
     </div>
     <div class="row">
       <div class="col-md-7">
         <div class="form-group">
           <label>{{$t('Tags (comma separated)')}}</label>
-          <input type="text" class="form-control border-input" v-model="value.tags" @input="updateValue($event.target.value)">
+          <input type="text" class="form-control border-input" v-model="value.tags" @input="computeTags">
         </div>
       </div>
       <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Period Start')}}</label>
-          <date-input v-model="value.start" @input="updateValue($event)"/>
+          <date-input v-model="value.start"/>
         </div>
       </div>
       <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Period End')}}</label>
-          <date-input v-model="value.end" @input="updateValue($event)"/>
+          <date-input v-model="value.end"/>
         </div>
       </div>
       <div class="col-md-1">
@@ -76,27 +76,80 @@
       deleteCallback: Function,
       index: Number,
       value: {
-        name: String,
-        unit: Number,
-        quantity: Number,
-        total: Number,
-        asset: String,
-        start: Date,
-        end: Date
+        name: {
+          type: String,
+          default: ''
+        },
+        unit_cost: {
+          type: Number,
+          default: 0
+        },
+        quantity: {
+          type: Number,
+          default: 0
+        },
+        total_cost: {
+          type: Number,
+          default: 0
+        },
+        asset: {
+          type: String,
+          default: ''
+        },
+        start: {
+          type: String,
+          default: ''
+        },
+        end: {
+          type: String,
+          default: ''
+        },
+        tags: {
+          type: Array,
+          default: []
+        }
       }
     },
     methods: {
-      updateValue () {
-        this.$emit('input', this.value)
-      },
       deleteMe () {
         if (this.deleteCallback !== undefined) {
           this.deleteCallback(this.index)
         }
+      },
+      calcFromUnit () {
+        if (this.value.quantity !== undefined && this.value.quantity !== 0) {
+          this.value.total_cost = this.value.unit_cost * this.value.quantity
+        }
+        if (this.value.total_cost !== undefined && this.value.total_cost !== 0) {
+          this.value.quantity = this.value.total_cost / this.value.unit_cost
+        }
+      },
+      calcFromQuantity () {
+        if (this.value.total_cost !== undefined && this.value.total_cost !== 0) {
+          this.value.unit_cost = this.value.total_cost / this.value.quantity
+        }
+        if (this.value.unit_cost !== undefined && this.value.unit_cost !== 0) {
+          this.value.total_cost = this.value.unit_cost * this.value.quantity
+        }
+      },
+      calcFromTotal () {
+        if (this.value.quantity !== undefined && this.value.quantity !== 0) {
+          this.value.unit_cost = this.value.total_cost / this.value.quantity
+        }
+        if (this.value.unit_cost !== undefined && this.value.unit_cost !== 0) {
+          this.value.quantity = this.value.total_cost / this.value.unit_cost
+        }
+      },
+      computeTags () {
+        if (this.tags === undefined) {
+          this.tags = ''
+        }
+        this.tags_list = this.tags.split(',')
       }
     },
     data () {
       return {
+        tags_list: []
       }
     }
   }

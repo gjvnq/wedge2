@@ -20,7 +20,7 @@
               <div class="col-md-2">
                 <div class="form-group">
                   <div style="height: 27px"></div>
-                  <button class="btn btn-info btn-fill btn-wd" :disabled="saving == false" @click="save">{{$t('Save')}}</button>
+                  <button class="btn btn-info btn-fill btn-wd" :disabled="saving == true" @click="save">{{$t('Save')}}</button>
                 </div>
               </div>
             </div>
@@ -35,14 +35,14 @@
       <div class="col-md-12">
         <div class="card">
           <div class="content">
-            <movement :accountsList="accountsList" :assetsList="assetsList" v-model="movements[index]" :index="index" :delete-callback="deleteMovement"></movement>
+            <movement :accountsList="accountsList" :assetsList="assetsList" v-model="movements[index]" :index="index" :delete-callback="deleteMovement" @change="autoSetAssetMov"></movement>
           </div>
         </div>
       </div>
     </div>
     <div class="row">
       <div class="text-center">
-        <button class="btn btn-info btn-fill btn-wd" :disabled="saving == false" @click="addMovement">{{$t('Add Movement')}}</button>
+        <button class="btn btn-info btn-fill btn-wd" :disabled="saving == true" @click="addMovement">{{$t('Add Movement')}}</button>
       </div>
     </div>
     <div class="row">
@@ -59,7 +59,7 @@
     </div>
     <div class="row">
       <div class="text-center">
-        <button class="btn btn-info btn-fill btn-wd" :disabled="saving == false" @click="addItem">{{$t('Add Item')}}</button>
+        <button class="btn btn-info btn-fill btn-wd" :disabled="saving == true" @click="addItem">{{$t('Add Item')}}</button>
       </div>
     </div>
     <div class="row" style="margin-top: 20px">
@@ -86,13 +86,29 @@
         this.movements.push({})
       },
       addItem () {
-        this.items.push({})
+        this.items.push({asset: this.default_asset})
       },
       deleteItem (index) {
         this.items.splice(index, 1)
       },
       deleteMovement (index) {
         this.movements.splice(index, 1)
+      },
+      autoSetAssetMov () {
+        if (this.movements.length === 0) {
+          // Array is too small
+          return
+        }
+
+        let asset = this.movements[0].asset
+        for (let movement of this.movements) {
+          if (movement.asset !== asset) {
+            // Assets are not consistent
+            this.default_asset = ''
+            return
+          }
+        }
+        this.default_asset = asset
       },
       save () {
         // if (this.transactionBtn === false) {
@@ -105,7 +121,7 @@
         fd['local_date'] = this.transactionDate
         fd['movements'] = []
         for (let movement of this.movements) {
-          var fd2 = {}
+          let fd2 = {}
           fd2['account_id'] = movement.account
           fd2['asset_id'] = movement.asset
           fd2['amount'] = movement.amount
@@ -113,9 +129,21 @@
           fd2['local_date'] = movement.date
           fd2['amount'] = movement.amount
           fd['movements'].push(fd2)
-          console.log(fd2)
         }
         fd['items'] = []
+        for (let item of this.items) {
+          let fd2 = {}
+          fd2['name'] = item.name
+          fd2['unit_cost'] = item.unit_cost
+          fd2['total_cost'] = item.total_cost
+          fd2['quantity'] = item.quantity
+          fd2['period_start'] = item.start
+          fd2['period_end'] = item.end
+          fd2['tags'] = item.tags_list
+          console.log(item.tags)
+          console.log(item.tags_list)
+          fd['items'].push(fd2)
+        }
         console.log(fd)
         // // Send request
         // this.$http.put('books/{book-id}/accounts', fd).then(response => { // Success
@@ -139,7 +167,8 @@
       return {
         transactionName: '',
         transactionDate: '',
-        saving: true,
+        saving: false,
+        default_asset: '',
         movements: [{}],
         items: []
       }

@@ -18,3 +18,6 @@ server_code: server/server
 
 api: server/server
 	cd server && ./server
+
+api-dev: server/server server/main.go
+	cd server && gin -p 8081 -a 8082 run main.go

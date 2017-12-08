@@ -54,9 +54,14 @@ func main() {
 	router.HandleFunc("/auth", Auth).Methods("POST")
 	router.HandleFunc("/auth/test", AuthTest).Methods("POST")
 
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8081"
+	}
+
 	handler := CorsMiddleware(router)
 	Log.Notice("Now listening...")
-	Log.Fatal(http.ListenAndServe(":8081", handler))
+	Log.Fatal(http.ListenAndServe(":"+port, handler))
 }
 
 func CorsMiddleware(next http.Handler) http.Handler {

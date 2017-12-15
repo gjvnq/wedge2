@@ -1,29 +1,31 @@
 <template>
   <div>
     <div class="row">
-      <div class="col-md-12">
-        <div class="card">
-          <div class="content">
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                  <label>{{$t('Name')}}</label>
-                  <input type="text" class="form-control border-input" v-model="transactionName">
-                </div>
-              </div>
-              <div class="col-md-4">
-                <div class="form-group">
-                  <label>{{$t('Date')}}</label>
-                  <input type="date" class="form-control border-input" v-model="transactionDate">
-                </div>
-              </div>
-              <div class="col-md-2">
-                <div class="form-group">
-                  <div style="height: 27px"></div>
-                  <button class="btn btn-info btn-fill btn-wd" :disabled="saving == true" @click="save">{{$t('Save')}}</button>
-                </div>
+      <div class="card">
+        <div class="content">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="form-group">
+                <label>{{$t('Name')}}</label>
+                <input type="text" class="form-control border-input" v-model="transactionName" :disabled="saving">
               </div>
             </div>
+            <div class="col-md-4">
+              <div class="form-group">
+                <label>{{$t('Date')}}</label>
+                <input type="date" class="form-control border-input" v-model="transactionDate" :disabled="saving">
+              </div>
+            </div>
+            <div class="col-md-2">
+              <div class="form-group">
+                <div style="height: 27px"></div>
+                <button class="btn btn-info btn-fill btn-wd" :disabled="saving == true" @click="save">{{$t('Save')}}</button>
+              </div>
+            </div>
+          </div>
+          <div class="text-center">
+            <span id="msgErrConn" class="label label-warning" :class="{ hide: !flagErrConn }" v-t="'Failed to comunicate with the server :-('"></span>
+            <span id="msgErrOk" class="label label-success" :class="{ hide: !flagOk }" v-t="'Successfully added transaction'"></span>
           </div>
         </div>
       </div>
@@ -35,7 +37,7 @@
       <div class="col-md-12">
         <div class="card">
           <div class="content">
-            <movement :accountsList="accountsList" :assetsList="assetsList" v-model="movements[index]" :index="index" :delete-callback="deleteMovement" @change="autoSetAssetMov"></movement>
+            <movement :accountsList="accountsList" :assetsList="assetsList" v-model="movements[index]" :index="index" :delete-callback="deleteMovement" @change="autoSetAssetMov" :disabled="saving"></movement>
           </div>
         </div>
       </div>
@@ -52,7 +54,7 @@
       <div class="col-md-12">
         <div class="card">
           <div class="content">
-            <item :assetsList="assetsList" v-model="items[index]" :index="index" :delete-callback="deleteItem"></item>
+            <item :assetsList="assetsList" v-model="items[index]" :index="index" :delete-callback="deleteItem" :disabled="saving"></item>
           </div>
         </div>
       </div>
@@ -111,10 +113,10 @@
         this.default_asset = asset
       },
       save () {
-        // if (this.transactionBtn === false) {
-        //   return
-        // }
-        // this.transactionBtn = false
+        if (this.saving === false) {
+          return
+        }
+        this.saving = false
         // Data
         var fd = {}
         fd['name'] = this.transactionName
@@ -140,26 +142,29 @@
           fd2['period_start'] = item.start
           fd2['period_end'] = item.end
           fd2['tags'] = item.tags_list
-          console.log(item.tags)
-          console.log(item.tags_list)
           fd['items'].push(fd2)
         }
-        console.log(fd)
-        // // Send request
-        // this.$http.put('books/{book-id}/accounts', fd).then(response => { // Success
-        //   this.transactionBtn = true
-        //   window.book_id = fd['book_id']
-        //   this.transactionName = ''
-        //   this.updateAccounts
-        // }, response => { // Error
-        //   console.log('err', response)
-        //   this.transactionBtn = true
-        //   alert(response.bodyText)
-        //   this.updateAccounts
-        // })
+        // Send request
+        this.$http.put('books/{book-id}/transactions', fd).then(response => { // Success
+          this.saving = true
+          this.updateTransactions()
+        }, response => { // Error
+          console.log('err', response)
+          this.saving = true
+          alert(response.bodyText)
+          this.updateTransactions()
+        })
       },
-      updateAccounts () {
-        this.$root.$children[0].$children[0].updateAccounts()
+      clear () {
+        this.movments = [{}]
+        this.items = []
+        this.transactionName = ''
+        this.transactionDate = ''
+        this.flagErrConn = false
+        this.flagOk = false
+      },
+      updateTransactions () {
+        this.$root.$children[0].$children[0].updateTransactions()
       }
     },
     props: ['accountsList', 'assetsList'],
@@ -170,7 +175,9 @@
         saving: false,
         default_asset: '',
         movements: [{}],
-        items: []
+        items: [{}, {}],
+        flagOk: false,
+        flagErrConn: false
       }
     }
   }

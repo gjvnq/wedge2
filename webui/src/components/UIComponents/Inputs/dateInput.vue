@@ -1,7 +1,7 @@
 <template>
   <div class="form-group">
     <label v-if="label">{{$t(label)}}</label>
-    <input type="date" class="form-control border-input" :value="value" @input="$emit('input', $event.target.value)" v-on="$listeners">
+    <input type="date" class="form-control border-input" :value="value" @input="$emit('input', $event.target.value)" v-on="$listeners" :disabled="disabled">
   </div>
 </template>
 <script>
@@ -9,7 +9,11 @@
     name: 'date-input',
     props: {
       value: String,
-      label: String
+      label: String,
+      disabled: {
+        type: Boolean,
+        default: false
+      }
     }
   }
 </script>

@@ -169,3 +169,157 @@ func Accounts_Set(account *Account) error {
 	}
 	return nil
 }
+
+func Transactions_InBook(book_id uuid.UUID) ([]Transaction, error) {
+	transactions := make([]Transaction, 0)
+	rows, err := DB.Query("SELECT `ID`, `Name`, `LocalDate`, `BookID` FROM `transactions` WHERE `BookID` = ? ORDER BY `LocalDate`, `Name`", book_id)
+	if err == sql.ErrNoRows {
+		return nil, err
+	}
+	if err != nil {
+		Log.WarningF("Error when loading transactions: %#v", err)
+		return nil, err
+	}
+	defer rows.Close()
+	// Load basic stuff
+	for rows.Next() {
+		transaction := Transaction{}
+		err = rows.Scan(
+			&transaction.ID,
+			&transaction.Name,
+			&transaction.LocalDate,
+			&transaction.BookID)
+		if err != nil {
+			Log.WarningF("Error when loading transaction %s: %#v", transaction.ID.String(), err)
+			return nil, err
+		}
+		transactions = append(transactions, transaction)
+	}
+	// Fill in stuff
+	for i := 0; i < len(transactions); i++ {
+		Transactions_FillMovements(&transactions[i])
+		Transactions_FillItems(&transactions[i])
+	}
+	return transactions, nil
+}
+
+func Transactions_FillMovements(transaction *Transaction) error {
+	transaction.Movements = make([]Movement, 0)
+	rows, err := DB.Query("SELECT `ID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `Status`, `LocalDate`, `Notes` FROM `movements` WHERE `TransactionID` = ? ORDER BY `LocalDate`, `Amount`", transaction.ID)
+	if err == sql.ErrNoRows {
+		return err
+	}
+	if err != nil {
+		Log.WarningF("Error when loading movements: %#v", err)
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		movement := Movement{}
+		err = rows.Scan(
+			&movement.ID,
+			&movement.AccountID,
+			&movement.AssetID,
+			&movement.TransactionID,
+			&movement.Amount,
+			&movement.Status,
+			&movement.LocalDate,
+			&movement.Notes)
+		if err != nil {
+			Log.WarningF("Error when loading movement %s: %#v", movement.ID.String(), err)
+			return err
+		}
+		transaction.Movements = append(transaction.Movements, movement)
+	}
+	return nil
+}
+
+func Transactions_FillItems(transaction *Transaction) error {
+	transaction.Items = make([]Item, 0)
+	rows, err := DB.Query("SELECT `ID`, `AssetID`, `TransactionID`, `Name`, `UnitCost`, `Qty`, `TotalCost`, `PeriodEnd`, `PeriodStart` FROM `items` WHERE `TransactionID` = ? ORDER BY `LocalDate`, `Amount`", transaction.ID)
+	if err == sql.ErrNoRows {
+		return err
+	}
+	if err != nil {
+		Log.WarningF("Error when loading items: %#v", err)
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		item := Item{}
+		err = rows.Scan(
+			&item.ID,
+			&item.AssetID,
+			&item.TransactionID,
+			&item.Name,
+			&item.UnitCost,
+			&item.Qty,
+			&item.TotalCost,
+			&item.PeriodStart,
+			&item.PeriodEnd)
+		if err != nil {
+			Log.WarningF("Error when loading item %s: %#v", item.ID.String(), err)
+			return err
+		}
+		transaction.Items = append(transaction.Items, item)
+	}
+	return nil
+}
+
+func Transactions_Set(transaction *Transaction) error {
+	// If the ID is nil, assume it is a new transaction and give it a new ID
+	if transaction.ID.IsNil() {
+		transaction.ID = uuid.NewV4()
+	}
+	tx, err := DB.Begin()
+	if err != nil {
+		Log.WarningF("Error when creating transaction: %#v", err)
+		return err
+	}
+	tx.Exec("REPLACE INTO `transactions` (`ID`, `Name`, `LocalDate`, `BookID`) VALUE (?, ?, ?, ?)",
+		transaction.ID,
+		transaction.Name,
+		transaction.LocalDate,
+		transaction.BookID)
+	tx.Exec("DELETE `movements` WHERE `TransactionID` = ?",
+		transaction.ID)
+	tx.Exec("DELETE `items` WHERE `TransactionID` = ?",
+		transaction.ID)
+	for i := 0; i < len(transaction.Movements); i++ {
+		mov := &transaction.Movements[i]
+		if mov.ID.IsNil() {
+			mov.ID = uuid.NewV4()
+		}
+		tx.Exec("INSERT INTO `movements` (`ID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `Status`, `LocalDate`, `Notes`) VALUES (?, ?, ?, ?, ?)",
+			mov.ID,
+			mov.AccountID,
+			mov.AssetID,
+			mov.TransactionID,
+			mov.Amount,
+			mov.Status,
+			mov.Notes)
+	}
+	for i := 0; i < len(transaction.Items); i++ {
+		item := &transaction.Items[i]
+		if item.ID.IsNil() {
+			item.ID = uuid.NewV4()
+		}
+		tx.Exec("INSERT INTO `items` (`ID`, `AssetID`, `TransactionID`, `Name`, `UnitCost`, `Qty`, `TotalCost`, `PeriodStart`, `PeriodEnd`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+			item.ID,
+			item.AssetID,
+			item.TransactionID,
+			item.Name,
+			item.UnitCost,
+			item.Qty,
+			item.TotalCost,
+			item.PeriodStart,
+			item.PeriodEnd)
+	}
+	err = tx.Commit()
+	if err != nil {
+		Log.WarningF("Error when updating transaction %s %s: %#v", transaction.ID, transaction.Name, err)
+		return err
+	}
+
+	return nil
+}

@@ -1,30 +1,30 @@
 <template>
   <div class="row">
     <div class="col-md-2">
-      <selector label="Account" v-model="value.account" :list="accountsList" @change="onChange"/>
+      <selector label="Account" v-model="value.account" :list="accountsList" @change="onChange" :disabled="disabled"/>
     </div>
     <div class="col-md-2">
       <div class="form-group">
         <label>{{$t('Value')}}</label>
-        <input type="text" class="form-control border-input" v-model.number="value.amount" @change="onChange"/>
+        <input type="text" class="form-control border-input" v-model.number="value.amount" @change="onChange" :disabled="disabled"/>
       </div>
     </div>
     <div class="col-md-3">
-      <asset-selector label="Currency or Asset" v-model="value.asset" :list="assetsList" @change="onChange"/>
+      <asset-selector label="Currency or Asset" v-model="value.asset" :list="assetsList" @change="onChange" :disabled="disabled"/>
     </div>
     <div class="col-md-2">
       <div class="form-group">
         <label>{{$t('Date')}}</label>
-        <input type="date" class="form-control border-input" v-model="value.date" @change="onChange"/>
+        <input type="date" class="form-control border-input" v-model="value.date" @change="onChange" :disabled="disabled"/>
       </div>
     </div>
     <div class="col-md-2">
-      <selector label="Status" v-model="value.status" :list="statusList" @change="onChange"/>
+      <selector label="Status" v-model="value.status" :list="statusList" @change="onChange" :disabled="disabled"/>
     </div>
     <div class="col-md-1">
       <div class="form-group">
         <div style="height: 27px"></div>
-        <button class="btn btn-danger btn-fill" @click="deleteMe"><span class="ti-trash"></span></button>
+        <button class="btn btn-danger btn-fill" @click="deleteMe" :disabled="disabled"><span class="ti-trash"></span></button>
       </div>
     </div>
   </div>
@@ -44,6 +44,10 @@
       accountsList: Array,
       deleteCallback: Function,
       index: Number,
+      disabled: {
+        type: Boolean,
+        default: false
+      },
       value: {
         account: {
           type: String,

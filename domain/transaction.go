@@ -16,5 +16,5 @@ type Transaction struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	// Associations
 	Movements []Movement `json:"movements,omitempty"`
-	Items     []Item     `json:"itens,omitempty"`
+	Items     []Item     `json:"items,omitempty"`
 }

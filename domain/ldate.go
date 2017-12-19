@@ -4,6 +4,8 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"strconv"
+	"strings"
 )
 
 const DAY_ANY = 0
@@ -23,10 +25,9 @@ const MONTH_NOV = 11
 const MONTH_DEC = 12
 
 type LDate struct {
-	year     int
-	month    int
-	day      int
-	year_day int
+	year  int
+	month int
+	day   int
 }
 
 func IsLeapYear(year int) bool {
@@ -83,6 +84,10 @@ func DaysInMonthLeap(month int, leap bool) int {
 	}
 }
 
+func DaysInMonthYear(month int, year int) int {
+	return DaysInMonthLeap(month, IsLeapYear(year))
+}
+
 func (ld LDate) month_day_to_year_day() int {
 	if !ld.is_valid() {
 		return -1
@@ -115,7 +120,7 @@ func Limit99(v int) int {
 }
 
 func (ld LDate) Value() (driver.Value, error) {
-	return int(1E4)*ld.year + int(1E2)*Limit99(ld.month) + Limit99(ld.day), nil
+	return int64(int(1E4)*ld.year + int(1E2)*Limit99(ld.month) + Limit99(ld.day)), nil
 }
 
 func (ld *LDate) Scan(value interface{}) error {
@@ -135,4 +140,47 @@ func (ld *LDate) Scan(value interface{}) error {
 		}
 	}
 	return errors.New("failed to scan LDate")
+}
+
+func (ld *LDate) UnmarshalJSON(raw_data []byte) error {
+	var err error
+
+	data := string(raw_data)
+	data = strings.Replace(data, "\"", "", -1)
+	numbers := strings.Split(data, "-")
+	if len(numbers) != 3 {
+		return errors.New("invalid format, it MUST be yyyy-mm-dd")
+	}
+	ld.year, err = strconv.Atoi(numbers[0])
+	if err != nil {
+		Log.Error(err)
+		return errors.New("'" + numbers[0] + "' is not a valid integer")
+	}
+	if ld.year < 1582 {
+		return errors.New("year must be 1582 or after")
+	}
+	if ld.year > 9999 {
+		return errors.New("year must be 9999 or earlier")
+	}
+	ld.month, err = strconv.Atoi(numbers[1])
+	if err != nil {
+		return errors.New("'" + numbers[1] + "' is not a valid integer")
+	}
+	if !(0 <= ld.month && ld.month <= 12) {
+		return errors.New("month must be between 0 and 12")
+	}
+	ld.day, err = strconv.Atoi(numbers[2])
+	if err != nil {
+		return errors.New("'" + numbers[2] + "' is not a valid integer")
+	}
+	max_days := DaysInMonthYear(ld.month, ld.year)
+	if !(0 <= ld.day && ld.day <= max_days) {
+		return errors.New("day must be between 0 and " + strconv.Itoa(max_days))
+	}
+
+	return nil
+}
+
+func (ld LDate) MarshalJSON() ([]byte, error) {
+	return []byte("\"" + ld.String() + "\""), nil
 }

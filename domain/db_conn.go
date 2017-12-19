@@ -267,6 +267,7 @@ func Transactions_FillItems(transaction *Transaction) error {
 }
 
 func Transactions_Set(transaction *Transaction) error {
+	var err error
 	// If the ID is nil, assume it is a new transaction and give it a new ID
 	if transaction.ID.IsNil() {
 		transaction.ID = uuid.NewV4()
@@ -276,35 +277,58 @@ func Transactions_Set(transaction *Transaction) error {
 		Log.WarningF("Error when creating transaction: %#v", err)
 		return err
 	}
-	tx.Exec("REPLACE INTO `transactions` (`ID`, `Name`, `LocalDate`, `BookID`) VALUE (?, ?, ?, ?)",
+	_, err = DB.Exec("REPLACE INTO `transactions` (`ID`, `Name`, `LocalDate`, `BookID`) VALUE (?, ?, ?, ?)",
 		transaction.ID,
 		transaction.Name,
 		transaction.LocalDate,
 		transaction.BookID)
-	tx.Exec("DELETE `movements` WHERE `TransactionID` = ?",
+	if err != nil {
+		tx.Rollback()
+		Log.WarningF("Error when creating transaction: %#v", err)
+		return err
+	}
+	_, err = tx.Exec("DELETE FROM `movements` WHERE `TransactionID` = ?",
 		transaction.ID)
-	tx.Exec("DELETE `items` WHERE `TransactionID` = ?",
+	if err != nil {
+		tx.Rollback()
+		Log.WarningF("Error when creating transaction: %#v", err)
+		return err
+	}
+	_, err = tx.Exec("DELETE FROM `items` WHERE `TransactionID` = ?",
 		transaction.ID)
+	if err != nil {
+		tx.Rollback()
+		Log.WarningF("Error when creating transaction: %#v", err)
+		return err
+	}
 	for i := 0; i < len(transaction.Movements); i++ {
 		mov := &transaction.Movements[i]
 		if mov.ID.IsNil() {
 			mov.ID = uuid.NewV4()
 		}
-		tx.Exec("INSERT INTO `movements` (`ID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `Status`, `LocalDate`, `Notes`) VALUES (?, ?, ?, ?, ?)",
+		mov.TransactionID = transaction.ID
+		_, err = tx.Exec("INSERT INTO `movements` (`ID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `Status`, `LocalDate`, `Notes`) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
 			mov.ID,
 			mov.AccountID,
 			mov.AssetID,
 			mov.TransactionID,
 			mov.Amount,
 			mov.Status,
+			mov.LocalDate,
 			mov.Notes)
+		if err != nil {
+			tx.Rollback()
+			Log.WarningF("Error when creating transaction: %#v", err)
+			return err
+		}
 	}
 	for i := 0; i < len(transaction.Items); i++ {
 		item := &transaction.Items[i]
 		if item.ID.IsNil() {
 			item.ID = uuid.NewV4()
 		}
-		tx.Exec("INSERT INTO `items` (`ID`, `AssetID`, `TransactionID`, `Name`, `UnitCost`, `Qty`, `TotalCost`, `PeriodStart`, `PeriodEnd`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+		item.TransactionID = transaction.ID
+		_, err = tx.Exec("INSERT INTO `items` (`ID`, `AssetID`, `TransactionID`, `Name`, `UnitCost`, `Qty`, `TotalCost`, `PeriodStart`, `PeriodEnd`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
 			item.ID,
 			item.AssetID,
 			item.TransactionID,
@@ -314,7 +338,13 @@ func Transactions_Set(transaction *Transaction) error {
 			item.TotalCost,
 			item.PeriodStart,
 			item.PeriodEnd)
+		if err != nil {
+			tx.Rollback()
+			Log.WarningF("Error when creating transaction: %#v", err)
+			return err
+		}
 	}
+	Log.Debug("Commiting")
 	err = tx.Commit()
 	if err != nil {
 		Log.WarningF("Error when updating transaction %s %s: %#v", transaction.ID, transaction.Name, err)

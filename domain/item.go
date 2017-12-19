@@ -3,7 +3,7 @@ package wedge
 import (
 	"time"
 
-	"github.com/satori/go.uuid"
+	"github.com/gjvnq/go.uuid"
 )
 
 type Item struct {
@@ -11,9 +11,9 @@ type Item struct {
 	AssetID       uuid.UUID `json:"asset_id"`
 	TransactionID uuid.UUID `json:"transaction_id"`
 	Name          string    `json:"name"`
-	UnitCost      int       `json:"unit_cost"`
+	UnitCost      int64     `json:"unit_cost"`
 	Qty           float64   `json:"quantity"`
-	TotalCost     int       `json:"total_cost"`
+	TotalCost     int64     `json:"total_cost"`
 	PeriodEnd     LDate     `json:"period_end"`
 	PeriodStart   LDate     `json:"period_start"`
 	// Date Stuff

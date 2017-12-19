@@ -10,24 +10,24 @@
       <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Unit Value')}}</label>
-          <input type="text" class="form-control border-input" v-model.number="value.unit_cost" @input="calcFromUnit" :disabled="disabled">
+          <input type="text" class="form-control border-input" v-model.number="value.unit_cost" @input="calcFromUnit" :disabled="disabled" @change="onChange">
         </div>
       </div>
       <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Quantity')}}</label>
-          <input type="text" class="form-control border-input" v-model.number="value.quantity" @input="calcFromQuantity" :disabled="disabled">
+          <input type="text" class="form-control border-input" v-model.number="value.quantity" @input="calcFromQuantity" :disabled="disabled" @change="onChange">
         </div>
       </div>
       <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Total Value')}}</label>
-          <input type="text" class="form-control border-input" v-model.number="value.total_cost" @input="calcFromTotal" :disabled="disabled">
+          <input type="text" class="form-control border-input" v-model.number="value.total_cost" @input="calcFromTotal" :disabled="disabled" @change="onChange">
         </div>
       </div>
 
       <div class="col-md-3">
-        <asset-selector label="Currency or Asset" v-model="value.asset" :list="assetsList" :disabled="disabled"/>
+        <asset-selector label="Currency or Asset" v-model="value.asset" :list="assetsList" :disabled="disabled" @change="onChange"/>
       </div>
     </div>
     <div class="row">
@@ -88,7 +88,15 @@
           type: Number,
           default: 0
         },
+        unit_cost_int: {
+          type: Number,
+          default: 0
+        },
         quantity: {
+          type: Number,
+          default: 0
+        },
+        total_cost_int: {
           type: Number,
           default: 0
         },
@@ -115,6 +123,20 @@
       }
     },
     methods: {
+      onChange (e) {
+        console.log(this.value)
+        var asset = {}
+        for (var i = 0; i < this.assetsList.length; i++) {
+          if (this.assetsList[i].id === this.value.asset) {
+            asset = this.assetsList[i]
+            break
+          }
+        }
+        this.value.unit_cost_int = Math.floor(this.value.unit_cost * 10 ** asset.places)
+        this.value.total_cost_int = Math.floor(this.value.total_cost * 10 ** asset.places)
+        console.log(this.value)
+        this.$emit('change', this.value)
+      },
       deleteMe () {
         if (this.deleteCallback !== undefined) {
           this.deleteCallback(this.index)

@@ -42,6 +42,11 @@
         </div>
       </div>
     </div>
+    <div class="row" style="margin-bottom: 15px">
+      <div class="text-center">
+        <p class="text-warning" v-if="warn_zero_sum">{{ $t("Shouldn't the sum be zero?") }}</p>
+      </div>
+    </div>
     <div class="row">
       <div class="text-center">
         <button class="btn btn-info btn-fill btn-wd" :disabled="saving == true" @click="addMovement">{{$t('Add Movement')}}</button>
@@ -111,9 +116,21 @@
           }
         }
         this.default_asset = asset
+
+        // Check for sum
+        this.warn_zero_sum = false
+        if (this.movements.length === 2) {
+          console.log(this.movements[0])
+          var prod = this.movements[0].amount * this.movements[1].amount
+          var sum = this.movements[0].amount + this.movements[1].amount
+          console.log(prod, sum)
+          if (prod < 0 && sum !== 0) {
+            this.warn_zero_sum = true
+          }
+        }
       },
       save () {
-        if (this.saving === false) {
+        if (this.saving === true) {
           return
         }
         this.saving = false
@@ -126,18 +143,18 @@
           let fd2 = {}
           fd2['account_id'] = movement.account
           fd2['asset_id'] = movement.asset
-          fd2['amount'] = movement.amount
+          fd2['amount'] = movement.amount_int
           fd2['status'] = movement.status
           fd2['local_date'] = movement.date
-          fd2['amount'] = movement.amount
           fd['movements'].push(fd2)
         }
         fd['items'] = []
         for (let item of this.items) {
           let fd2 = {}
           fd2['name'] = item.name
-          fd2['unit_cost'] = item.unit_cost
-          fd2['total_cost'] = item.total_cost
+          fd2['asset_id'] = item.asset
+          fd2['unit_cost'] = item.unit_cost_int
+          fd2['total_cost'] = item.total_cost_int
           fd2['quantity'] = item.quantity
           fd2['period_start'] = item.start
           fd2['period_end'] = item.end
@@ -146,11 +163,11 @@
         }
         // Send request
         this.$http.put('books/{book-id}/transactions', fd).then(response => { // Success
-          this.saving = true
+          this.saving = false
           this.updateTransactions()
         }, response => { // Error
           console.log('err', response)
-          this.saving = true
+          this.saving = false
           alert(response.bodyText)
           this.updateTransactions()
         })
@@ -164,7 +181,7 @@
         this.flagOk = false
       },
       updateTransactions () {
-        this.$root.$children[0].$children[0].updateTransactions()
+        // this.$root.$children[0].$children[0].updateTransactions()
       }
     },
     props: ['accountsList', 'assetsList'],
@@ -175,9 +192,10 @@
         saving: false,
         default_asset: '',
         movements: [{}],
-        items: [{}, {}],
+        items: [],
         flagOk: false,
-        flagErrConn: false
+        flagErrConn: false,
+        warn_zero_sum: false
       }
     }
   }

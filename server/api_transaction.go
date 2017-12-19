@@ -32,6 +32,7 @@ func TransactionSet(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
+	Log.Debug(transaction)
 
 	// Check auth
 	if IsAuthInvalid3(w, r, &transaction.BookID) {

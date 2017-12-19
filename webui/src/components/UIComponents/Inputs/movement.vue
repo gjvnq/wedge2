@@ -57,6 +57,10 @@
           type: Number,
           default: 0
         },
+        amount_int: {
+          type: Number,
+          default: 0
+        },
         asset: {
           type: String,
           default: ''
@@ -73,6 +77,14 @@
     },
     methods: {
       onChange (e) {
+        var asset = {}
+        for (var i = 0; i < this.assetsList.length; i++) {
+          if (this.assetsList[i].id === this.value.asset) {
+            asset = this.assetsList[i]
+            break
+          }
+        }
+        this.value.amount_int = Math.floor(this.value.amount * 10 ** asset.places)
         this.$emit('change', this.value)
       },
       deleteMe () {

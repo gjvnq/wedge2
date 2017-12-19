@@ -24,6 +24,7 @@ export const messages = {
     Save: 'Salvar',
     Quantity: 'Quantidade',
     Status: 'Status',
+    'Shouldn\'t the sum be zero?': 'A soma não deveria ser zero?',
     'Successfully added transaction': 'Transação adicionada com sucesso',
     'New Transaction': 'Nova Transação',
     'The save button is at the top of this page': 'O botão de salvar está no topo desta página',

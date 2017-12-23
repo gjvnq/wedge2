@@ -88,6 +88,10 @@
       movement,
       item
     },
+    beforeMount () {
+      this.$store.dispatch('updateAssets')
+      this.$store.dispatch('updateAccounts')
+    },
     methods: {
       addMovement () {
         this.movements.push({})
@@ -181,10 +185,17 @@
         this.flagOk = false
       },
       updateTransactions () {
-        // this.$root.$children[0].$children[0].updateTransactions()
+        this.$store.dispatch('updateTransactions')
       }
     },
-    props: ['accountsList', 'assetsList'],
+    computed: {
+      assetsList () {
+        return this.$store.state.assets
+      },
+      accountsList () {
+        return this.$store.state.accounts
+      }
+    },
     data () {
       return {
         transactionName: '',

@@ -1,9 +1,11 @@
 import Vue from 'vue'
+import Vuex from 'vuex'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import VueResource from 'vue-resource'
 
 // Plugins
+import storePlugin from './storePlugin'
 import GlobalComponents from './globalComponents'
 import GlobalDirectives from './globalDirectives'
 import Notifications from './components/UIComponents/NotificationPlugin'
@@ -23,6 +25,8 @@ import 'es6-promise/auto'
 import {messages} from './i18n.js'
 
 // plugin setup
+Vue.use(Vuex)
+Vue.use(storePlugin)
 Vue.use(VueI18n)
 Vue.use(VueRouter)
 Vue.use(VueResource)

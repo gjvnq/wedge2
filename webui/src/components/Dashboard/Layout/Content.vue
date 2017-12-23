@@ -3,15 +3,12 @@
     <div class="container-fluid">
         <transition name="fade" mode="out-in">
           <!-- your content here -->
-          <router-view :globoids="globoids" v-bind="globoids"></router-view>
+          <router-view></router-view>
         </transition>
     </div>
   </div>
 </template>
 <script>
-  export default {
-    props: ['globoids']
-  }
 </script>
 <style>
   .fade-enter-active,

@@ -39,7 +39,7 @@
     </div>
     <div class="col-md-12">
       <div class="card">
-        <paper-table :title="$t(tblAssets.title)" :sub-title="$t(tblAssets.subTitle)" :data="tblAssets.data" :columns="tblAssets.columns" :columnsStyles="tblAssets.columnsStyles" :click_callback="tblAssets.click_callback">
+        <paper-table :title="$t(tblAssets.title)" :sub-title="$t(tblAssets.subTitle)" :data="tblAssetsData" :columns="tblAssets.columns" :columnsStyles="tblAssets.columnsStyles" :click_callback="tblAssets.click_callback">
         </paper-table>
       </div>
     </div>
@@ -83,18 +83,15 @@
         })
       },
       updateAssets () {
-        console.log(this.$parent.$parent.updateAssets)
-        this.$parent.$parent.updateAssets(response => {
-          console.log('callbacked')
-          for (var i = 0; i < response.body.length; i++) {
-            response.body[i]._extra = '<span class="ti-pencil"></span>'
-          }
-          this.rawAssetsList = response.body
-          this.tblAssets.data = this.rawAssetsList
-        })
+        this.$store.dispatch('updateAssets')
       }
     },
     props: ['assetsList'],
+    computed: {
+      tblAssetsData () {
+        return this.$store.state.assets
+      }
+    },
     data () {
       return {
         newAssetCode: '',
@@ -109,7 +106,6 @@
             console.log('Currency ' + obj.code + ' clicked')
           },
           columns: [...tableColumns],
-          data: [],
           columnsStyles: [...tableColumnsStyle]
         }
       }

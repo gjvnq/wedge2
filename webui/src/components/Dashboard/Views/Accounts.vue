@@ -83,8 +83,15 @@
         })
       },
       updateAccounts () {
-        console.log(this.$parent.$parent.updateAccounts)
-        this.$parent.$parent.updateAccounts()
+        this.$store.dispatch('updateAccounts')
+      }
+    },
+    computed: {
+      accountsList () {
+        return this.$store.state.accounts
+      },
+      accountsTree () {
+        return this.$store.state.accountsTree
       }
     },
     data () {
@@ -93,8 +100,7 @@
         newAccountParent: '00000000-0000-0000-0000-000000000000',
         newAccountBtn: true
       }
-    },
-    props: ['accountsList', 'accountsTree']
+    }
   }
 
 </script>

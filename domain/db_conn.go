@@ -2,6 +2,8 @@ package wedge
 
 import (
 	"database/sql"
+	"errors"
+	"strings"
 
 	"github.com/gjvnq/go-logger"
 	"github.com/gjvnq/go.uuid"
@@ -51,7 +53,7 @@ func Books_All(redact bool) ([]Book, error) {
 
 func Assets_InBook(book_id uuid.UUID) ([]Asset, error) {
 	assets := make([]Asset, 0)
-	rows, err := DB.Query("SELECT `ID`, `BookID`, `Name`, `Code`, `Places` FROM `assets` WHERE `BookID` = ? ORDER BY CHAR_LENGTH(`Code`), `Code`", book_id)
+	rows, err := DB.Query("SELECT `ID`, `BookID`, `Name`, `Code` FROM `assets` WHERE `BookID` = ? ORDER BY CHAR_LENGTH(`Code`), `Code`", book_id)
 	if err == sql.ErrNoRows {
 		return nil, err
 	}
@@ -66,8 +68,7 @@ func Assets_InBook(book_id uuid.UUID) ([]Asset, error) {
 			&asset.ID,
 			&asset.BookID,
 			&asset.Name,
-			&asset.Code,
-			&asset.Places)
+			&asset.Code)
 		if err != nil {
 			Log.WarningF("Error when loading asset %s: %#v", asset.ID.String(), err)
 			return nil, err
@@ -79,12 +80,11 @@ func Assets_InBook(book_id uuid.UUID) ([]Asset, error) {
 
 func Assets_GetById(asset_id uuid.UUID) (Asset, error, bool) {
 	asset := Asset{}
-	err := DB.QueryRow("SELECT `ID`, `BookID`, `Name`, `Code`, `Places` FROM `assets` WHERE `ID` = ?", asset_id).Scan(
+	err := DB.QueryRow("SELECT `ID`, `BookID`, `Name`, `Code` FROM `assets` WHERE `ID` = ?", asset_id).Scan(
 		&asset.ID,
 		&asset.BookID,
 		&asset.Name,
-		&asset.Code,
-		&asset.Places)
+		&asset.Code)
 	if err == sql.ErrNoRows {
 		return Asset{}, err, true
 	}
@@ -95,33 +95,39 @@ func Assets_GetById(asset_id uuid.UUID) (Asset, error, bool) {
 	return asset, nil, false
 }
 
-func Assets_Update(asset *Asset) error {
-	_, err := DB.Exec("UPDATE `assets` SET `BookID` = ?, `Name` = ?, `Code` = ?, `Places` = ? WHERE `ID` = ?",
-		asset.BookID,
-		asset.Name,
-		asset.Code,
-		asset.Places,
-		asset.ID)
-	if err != nil {
-		Log.WarningF("Error when updating asset %s: %#v", asset.ID.String(), err)
-		return err
-	}
-	return nil
-}
+func Assets_Set(asset *Asset) error {
+	tx, err := DB.Begin()
 
-func Assets_Insert(asset *Asset) error {
+	// If the ID is nil, assume it is a new asset and give it a new ID
 	if asset.ID.IsNil() {
 		asset.ID = uuid.NewV4()
+		// Ensure there is no asset with the same code
+		counter := -1
+		err = tx.QueryRow("SELECT COUNT(*) FROM `assets` WHERE `Code` = ? AND `BookID` = ?",
+			asset.Code,
+			asset.BookID).Scan(&counter)
+		if err != nil {
+			Log.WarningF("Error when counting assets with code %s in book %s: %#v", asset.Code, asset.BookID, err)
+			return FixError(err)
+		}
+		if counter != 0 {
+			tx.Rollback()
+			return errors.New("duplicate entry")
+		}
 	}
-	_, err := DB.Exec("INSERT INTO `assets` (`ID`, `BookID`, `Name`, `Code`, `Places`) VALUES (?, ?, ?, ?, ?);",
+	_, err = tx.Exec("REPLACE INTO `assets` (`Id`, `Name`, `Code`, `BookID`) VALUE (?, ?, ?, ?)",
 		asset.ID,
-		asset.BookID,
 		asset.Name,
 		asset.Code,
-		asset.Places)
+		asset.BookID)
 	if err != nil {
-		Log.WarningF("Error when inserting asset %+v: %#v", asset, err)
-		return err
+		Log.WarningF("Error when updating asset %s %s: %#v", asset.ID, asset.Name, err)
+		return FixError(err)
+	}
+	err = tx.Commit()
+	if err != nil {
+		Log.WarningF("Error when updating asset %s %s: %#v", asset.ID, asset.Name, err)
+		return FixError(err)
 	}
 	return nil
 }
@@ -165,7 +171,7 @@ func Accounts_Set(account *Account) error {
 		account.BookID)
 	if err != nil {
 		Log.WarningF("Error when updating account %s %s: %#v", account.ID, account.Name, err)
-		return err
+		return FixError(err)
 	}
 	return nil
 }
@@ -207,11 +213,11 @@ func Transactions_FillMovements(transaction *Transaction) error {
 	transaction.Movements = make([]Movement, 0)
 	rows, err := DB.Query("SELECT `ID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `Status`, `LocalDate`, `Notes` FROM `movements` WHERE `TransactionID` = ? ORDER BY `LocalDate`, `Amount`", transaction.ID)
 	if err == sql.ErrNoRows {
-		return err
+		return FixError(err)
 	}
 	if err != nil {
 		Log.WarningF("Error when loading movements: %#v", err)
-		return err
+		return FixError(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -227,7 +233,7 @@ func Transactions_FillMovements(transaction *Transaction) error {
 			&movement.Notes)
 		if err != nil {
 			Log.WarningF("Error when loading movement %s: %#v", movement.ID.String(), err)
-			return err
+			return FixError(err)
 		}
 		transaction.Movements = append(transaction.Movements, movement)
 	}
@@ -238,11 +244,11 @@ func Transactions_FillItems(transaction *Transaction) error {
 	transaction.Items = make([]Item, 0)
 	rows, err := DB.Query("SELECT `ID`, `AssetID`, `TransactionID`, `Name`, `UnitCost`, `Qty`, `TotalCost`, `PeriodEnd`, `PeriodStart` FROM `items` WHERE `TransactionID` = ? ORDER BY `LocalDate`, `Amount`", transaction.ID)
 	if err == sql.ErrNoRows {
-		return err
+		return FixError(err)
 	}
 	if err != nil {
 		Log.WarningF("Error when loading items: %#v", err)
-		return err
+		return FixError(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
@@ -259,7 +265,7 @@ func Transactions_FillItems(transaction *Transaction) error {
 			&item.PeriodEnd)
 		if err != nil {
 			Log.WarningF("Error when loading item %s: %#v", item.ID.String(), err)
-			return err
+			return FixError(err)
 		}
 		transaction.Items = append(transaction.Items, item)
 	}
@@ -275,7 +281,7 @@ func Transactions_Set(transaction *Transaction) error {
 	tx, err := DB.Begin()
 	if err != nil {
 		Log.WarningF("Error when creating transaction: %#v", err)
-		return err
+		return FixError(err)
 	}
 	_, err = DB.Exec("REPLACE INTO `transactions` (`ID`, `Name`, `LocalDate`, `BookID`) VALUE (?, ?, ?, ?)",
 		transaction.ID,
@@ -285,21 +291,21 @@ func Transactions_Set(transaction *Transaction) error {
 	if err != nil {
 		tx.Rollback()
 		Log.WarningF("Error when creating transaction: %#v", err)
-		return err
+		return FixError(err)
 	}
 	_, err = tx.Exec("DELETE FROM `movements` WHERE `TransactionID` = ?",
 		transaction.ID)
 	if err != nil {
 		tx.Rollback()
 		Log.WarningF("Error when creating transaction: %#v", err)
-		return err
+		return FixError(err)
 	}
 	_, err = tx.Exec("DELETE FROM `items` WHERE `TransactionID` = ?",
 		transaction.ID)
 	if err != nil {
 		tx.Rollback()
 		Log.WarningF("Error when creating transaction: %#v", err)
-		return err
+		return FixError(err)
 	}
 	for i := 0; i < len(transaction.Movements); i++ {
 		mov := &transaction.Movements[i]
@@ -319,7 +325,7 @@ func Transactions_Set(transaction *Transaction) error {
 		if err != nil {
 			tx.Rollback()
 			Log.WarningF("Error when creating transaction: %#v", err)
-			return err
+			return FixError(err)
 		}
 	}
 	for i := 0; i < len(transaction.Items); i++ {
@@ -341,15 +347,23 @@ func Transactions_Set(transaction *Transaction) error {
 		if err != nil {
 			tx.Rollback()
 			Log.WarningF("Error when creating transaction: %#v", err)
-			return err
+			return FixError(err)
 		}
 	}
 	Log.Debug("Commiting")
 	err = tx.Commit()
 	if err != nil {
 		Log.WarningF("Error when updating transaction %s %s: %#v", transaction.ID, transaction.Name, err)
-		return err
+		return FixError(err)
 	}
 
 	return nil
+}
+
+func FixError(err error) error {
+	if strings.Contains(strings.ToLower(err.Error()), "duplicate entry") {
+		Log.Debug("[duplicate entry]", err)
+		return errors.New("duplicate entry")
+	}
+	return err
 }

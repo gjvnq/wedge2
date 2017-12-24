@@ -9,6 +9,4 @@ type Asset struct {
 	BookID uuid.UUID `json:"book_id"`
 	Name   string    `json:"name"`
 	Code   string    `json:"code"`
-	Places int       `json:"places"`
-	Fmt    string    `json:"fmt"`
 }

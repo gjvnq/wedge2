@@ -15,16 +15,10 @@
                   <input type="text" class="form-control border-input" v-model="newAssetCode">
                 </div>
               </div>
-              <div class="col-md-5">
+              <div class="col-md-7">
                 <div class="form-group">
                   <label>{{$t('Name')}}</label>
                   <input type="text" class="form-control border-input" v-model="newAssetName">
-                </div>
-              </div>
-              <div class="col-md-2">
-                <div class="form-group">
-                  <label>{{$t('Decimal Places')}}</label>
-                  <input type="number" class="form-control border-input" v-model.number="newAssetPlaces">
                 </div>
               </div>
             </div>
@@ -67,14 +61,12 @@
         var fd = {}
         fd['code'] = this.newAssetCode
         fd['name'] = this.newAssetName
-        fd['places'] = this.newAssetPlaces
         // Send request
         this.$http.put('books/{book-id}/assets', fd).then(response => { // Success
           this.newAssetBtn = true
           window.book_id = fd['book_id']
           this.newAssetCode = ''
           this.newAssetName = ''
-          this.newAssetPlaces = 0
           this.updateAssets()
         }, response => { // Error
           console.log('err', response)
@@ -96,7 +88,6 @@
       return {
         newAssetCode: '',
         newAssetName: '',
-        newAssetPlaces: 0,
         newAssetBtn: true,
         rawAssetsList: [],
         tblAssets: {

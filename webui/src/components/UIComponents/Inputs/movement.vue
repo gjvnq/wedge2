@@ -75,17 +75,19 @@
         }
       }
     },
+    beforeMount () {
+      if (this.value.amount_int !== undefined && this.value.amount_int !== 0) {
+        this.setAmountInt(this.value.amount_int)
+      }
+    },
     methods: {
       onChange (e) {
-        var asset = {}
-        for (var i = 0; i < this.assetsList.length; i++) {
-          if (this.assetsList[i].id === this.value.asset) {
-            asset = this.assetsList[i]
-            break
-          }
-        }
-        this.value.amount_int = Math.floor(this.value.amount * 10 ** asset.places)
+        this.value.amount_int = Math.floor(this.value.amount * 1E8)
         this.$emit('change', this.value)
+      },
+      setAmountInt (amount) {
+        this.value.amount_int = amount
+        this.value.amount = this.value.amount_int / 1E8
       },
       deleteMe () {
         if (this.deleteCallback !== undefined) {

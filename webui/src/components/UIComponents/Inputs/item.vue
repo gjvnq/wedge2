@@ -122,25 +122,31 @@
         }
       }
     },
+    beforeMount () {
+      if (this.value.unit_cost_int !== undefined && this.value.unit_cost_int !== 0) {
+        this.setUnitCostInt(this.value.unit_cost_int)
+      }
+      if (this.value.total_cost_int !== undefined && this.value.total_cost_int !== 0) {
+        this.setTotalCostInt(this.value.total_cost_int)
+      }
+    },
     methods: {
       onChange (e) {
-        console.log(this.value)
-        var asset = {}
-        for (var i = 0; i < this.assetsList.length; i++) {
-          if (this.assetsList[i].id === this.value.asset) {
-            asset = this.assetsList[i]
-            break
-          }
-        }
-        this.value.unit_cost_int = Math.floor(this.value.unit_cost * 10 ** asset.places)
-        this.value.total_cost_int = Math.floor(this.value.total_cost * 10 ** asset.places)
-        console.log(this.value)
+        this.value.total_cost_int = Math.floor(this.value.total_cost * 1E8)
         this.$emit('change', this.value)
       },
       deleteMe () {
         if (this.deleteCallback !== undefined) {
           this.deleteCallback(this.index)
         }
+      },
+      setUnitCostInt (unitCost) {
+        this.value.unit_cost_int = unitCost
+        this.value.unit_cost = this.value.unit_cost_int / 1E8
+      },
+      setTotalCostInt (totalCost) {
+        this.value.total_cost_int = totalCost
+        this.value.total_cost = this.value.total_cost_int / 1E8
       },
       calcFromUnit () {
         if (this.value.quantity !== undefined && this.value.quantity !== 0) {

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strings"
 
 	"github.com/gjvnq/go-logger"
 	uuid "github.com/gjvnq/go.uuid"
@@ -113,4 +114,8 @@ func GetBookId(r *http.Request) uuid.UUID {
 func GetUUID(key string, r *http.Request) uuid.UUID {
 	vars := mux.Vars(r)
 	return uuid.FromStringOrNil(vars[key])
+}
+
+func IsDuplicate(err error) bool {
+	return strings.HasPrefix(err.Error(), "duplicate entry")
 }

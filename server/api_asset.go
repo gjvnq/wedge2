@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/gjvnq/wedge2/domain"
 )
@@ -39,13 +38,11 @@ func AssetsPut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Put on database
-	err = wedge.Assets_Insert(&asset)
+	err = wedge.Assets_Set(&asset)
 	if err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
-			if err != nil {
-				http.Error(w, "duplicate entry", 409)
-				return
-			}
+		if IsDuplicate(err) {
+			http.Error(w, "duplicate entry", 409)
+			return
 		}
 		http.Error(w, "", 500)
 		return

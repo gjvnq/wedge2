@@ -124,10 +124,8 @@
         // Check for sum
         this.warn_zero_sum = false
         if (this.movements.length === 2) {
-          console.log(this.movements[0])
           var prod = this.movements[0].amount * this.movements[1].amount
           var sum = this.movements[0].amount + this.movements[1].amount
-          console.log(prod, sum)
           if (prod < 0 && sum !== 0) {
             this.warn_zero_sum = true
           }

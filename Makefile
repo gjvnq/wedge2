@@ -20,4 +20,4 @@ api: server/server
 	cd server && ./server
 
 api-dev: server/server server/main.go
-	cd server && gin -p 8081 -a 8082 run main.go
+	reflex -s -r '(server|domain)/.*\.go$$' make api

@@ -1,8 +1,6 @@
 package wedge
 
 import (
-	"time"
-
 	"github.com/gjvnq/go.uuid"
 )
 
@@ -16,10 +14,4 @@ type Item struct {
 	TotalCost     int64     `json:"total_cost"`
 	PeriodEnd     LDate     `json:"period_end"`
 	PeriodStart   LDate     `json:"period_start"`
-	// Date Stuff
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	// Associations
-	Asset       Asset       `json:"asset,omitempty"`
-	Transaction Transaction `json:"transaction,omitempty"`
 }

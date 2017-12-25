@@ -16,8 +16,4 @@ type AssetValue struct {
 	// Date Stuff
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
-	// Associations
-	Book  Book  `json:"book,omitempty"`
-	Asset Asset `json:"asset,omitempty"`
-	Base  Asset `json:"base,omitempty"`
 }

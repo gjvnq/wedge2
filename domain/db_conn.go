@@ -242,7 +242,7 @@ func Transactions_FillMovements(transaction *Transaction) error {
 
 func Transactions_FillItems(transaction *Transaction) error {
 	transaction.Items = make([]Item, 0)
-	rows, err := DB.Query("SELECT `ID`, `AssetID`, `TransactionID`, `Name`, `UnitCost`, `Qty`, `TotalCost`, `PeriodEnd`, `PeriodStart` FROM `items` WHERE `TransactionID` = ? ORDER BY `LocalDate`, `Amount`", transaction.ID)
+	rows, err := DB.Query("SELECT `ID`, `AssetID`, `TransactionID`, `Name`, `UnitCost`, `Qty`, `TotalCost`, `PeriodEnd`, `PeriodStart` FROM `items` WHERE `TransactionID` = ? ORDER BY `Name`, `TotalCost`", transaction.ID)
 	if err == sql.ErrNoRows {
 		return FixError(err)
 	}

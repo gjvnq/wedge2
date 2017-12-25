@@ -131,15 +131,24 @@ func (ld *LDate) Scan(value interface{}) error {
 		return nil
 	}
 	if iv, err := driver.Int32.ConvertValue(value); err == nil {
-		if v, ok := iv.(int); ok {
-			ld.year = v / int(1E4)
-			v = v % int(1E4)
-			ld.month = v
-			ld.day = v % int(1E2)
-			return nil
+		v := 0
+		switch iv.(type) {
+		case int:
+			v = int(v)
+		case int32:
+			v = int(v)
+		case int64:
+			v = int(v)
+		default:
+			return errors.New("failed to scan LDate (#1)")
 		}
+		ld.year = v / int(1E4)
+		v = v % int(1E4)
+		ld.month = v
+		ld.day = v % int(1E2)
+		return nil
 	}
-	return errors.New("failed to scan LDate")
+	return errors.New("failed to scan LDate (#2)")
 }
 
 func (ld *LDate) UnmarshalJSON(raw_data []byte) error {

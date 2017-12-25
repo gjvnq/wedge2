@@ -1,8 +1,6 @@
 package wedge
 
 import (
-	"time"
-
 	"github.com/gjvnq/go.uuid"
 )
 
@@ -15,11 +13,4 @@ type Movement struct {
 	Status        string    `json:"status"`
 	LocalDate     LDate     `json:"local_date"`
 	Notes         string    `json:"notes"`
-	// Date Stuff
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
-	// Associations
-	Asset       Asset       `json:"asset,omitempty"`
-	Account     Account     `json:"account,omitempty"`
-	Transaction Transaction `json:"transaction,omitempty"`
 }

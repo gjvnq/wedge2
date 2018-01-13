@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/gjvnq/wedge2/domain"
 )
@@ -17,7 +16,7 @@ func TransactionList(w http.ResponseWriter, r *http.Request) {
 	// List Transactions
 	transactions, err := wedge.Transactions_InBook(GetBookId(r))
 	if err != nil {
-		http.Error(w, "", 500)
+		SendErrCodeAndLog(w, 500, err)
 		return
 	}
 
@@ -42,15 +41,40 @@ func TransactionSet(w http.ResponseWriter, r *http.Request) {
 	// Put on database
 	err = wedge.Transactions_Set(&transaction)
 	if err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
-			if err != nil {
-				http.Error(w, "duplicate entry", 409)
-				return
-			}
+		if IsDuplicate(err) {
+			SendErrCodeAndLog(w, 409, err)
+			return
 		}
-		http.Error(w, "", 500)
+		SendErrCodeAndLog(w, 500, err)
 		return
 	}
 
 	sendJSONResponse(w, transaction)
+}
+
+func TransactionGet(w http.ResponseWriter, r *http.Request) {
+	// Check auth
+	if IsAuthInvalid(w, r) {
+		return
+	}
+
+	// Get Transaction
+	tr, err, not_found := wedge.Transactions_GetByID(GetUUID("tr-id", r))
+	if not_found {
+		SendErrCodeAndLog(w, 404, err)
+		return
+	}
+	if err != nil {
+		Log.Warning(GetUUID("tr-id", r), err)
+		SendErrCodeAndLog(w, 500, err)
+		return
+	}
+
+	// Check auth
+	if !tr.BookID.Equal(GetBookId(r)) {
+		SendErrCodeAndLog(w, 403, err)
+		return
+	}
+
+	sendJSONResponse(w, tr)
 }

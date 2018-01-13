@@ -24,22 +24,22 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	auth_req := AuthReq{}
 	err := json.NewDecoder(r.Body).Decode(&auth_req)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		SendErrCodeAndLog(w, 400, err)
 		return
 	}
 	if auth_req.BookID.IsNil() {
-		http.Error(w, "ID must not be null", 404)
+		SendErrCodeAndLog(w, 400, "ID must not be null")
 		return
 	}
 
 	// Load book
 	book, err, not_found := wedge.Books_GetByID(auth_req.BookID)
 	if not_found {
-		http.Error(w, err.Error(), 404)
+		SendErrCodeAndLog(w, 404, err)
 		return
 	}
 	if err != nil {
-		http.Error(w, "", 500)
+		SendErrCodeAndLog(w, 500, err)
 		return
 	}
 
@@ -81,20 +81,20 @@ func IsAuthInvalid(w http.ResponseWriter, r *http.Request) bool {
 	token, err := jws.ParseJWTFromRequest(r)
 	if err != nil {
 		Log.WarningF("Unparsable JWT: %s", string(r.Header.Get("Authorization")))
-		w.WriteHeader(http.StatusUnauthorized)
+		SendErrCodeAndLog(w, 401, err)
 		return true
 	}
 	// Validate JWT
 	if token.Validate(JWTKey, crypto.SigningMethodHS256) != nil {
 		Log.WarningF("Invalid JWT: %+v", token.Claims())
-		w.WriteHeader(http.StatusUnauthorized)
+		SendErrCodeAndLog(w, 401, err)
 		return true
 	}
 	// Check subject
 	right_sub := vars["book-id"]
 	if sub, _ := token.Claims().Subject(); sub != right_sub {
 		Log.WarningF("Wrong subject on JWT. Got %s Expected %s", sub, right_sub)
-		w.WriteHeader(http.StatusForbidden)
+		SendErrCodeAndLog(w, 401, err)
 		return true
 	}
 	return false
@@ -109,7 +109,7 @@ func IsAuthInvalid3(w http.ResponseWriter, r *http.Request, book_id *uuid.UUID) 
 	if book_id_str == "" || book_id.IsNil() {
 		err := book_id.UnmarshalText([]byte(vars["book-id"]))
 		if err != nil {
-			http.Error(w, err.Error(), 400)
+			SendErrCodeAndLog(w, 400, err)
 			return true
 		}
 		return false

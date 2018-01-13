@@ -16,7 +16,7 @@ func AssetsList(w http.ResponseWriter, r *http.Request) {
 	// List Assets
 	assets, err := wedge.Assets_InBook(GetBookId(r))
 	if err != nil {
-		http.Error(w, "", 500)
+		SendErrCodeAndLog(w, 500, err)
 		return
 	}
 
@@ -28,7 +28,7 @@ func AssetsPut(w http.ResponseWriter, r *http.Request) {
 	asset := wedge.Asset{}
 	err := json.NewDecoder(r.Body).Decode(&asset)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		SendErrCodeAndLog(w, 400, err)
 		return
 	}
 
@@ -41,10 +41,10 @@ func AssetsPut(w http.ResponseWriter, r *http.Request) {
 	err = wedge.Assets_Set(&asset)
 	if err != nil {
 		if IsDuplicate(err) {
-			http.Error(w, "duplicate entry", 409)
+			SendErrCodeAndLog(w, 409, err)
 			return
 		}
-		http.Error(w, "", 500)
+		SendErrCodeAndLog(w, 500, err)
 		return
 	}
 

@@ -209,6 +209,29 @@ func Transactions_InBook(book_id uuid.UUID) ([]Transaction, error) {
 	return transactions, nil
 }
 
+func Transactions_GetByID(tr_id uuid.UUID) (Transaction, error, bool) {
+	tr := Transaction{}
+	err := DB.QueryRow("SELECT `ID`, `Name`, `LocalDate`, `BookID` FROM `transactions` WHERE `ID` = ? ORDER BY `LocalDate`, `Name`", tr_id).Scan(
+		&tr.ID,
+		&tr.Name,
+		&tr.LocalDate,
+		&tr.BookID)
+	if err == sql.ErrNoRows {
+		return tr, nil, true
+	}
+	if err != nil {
+		Log.WarningF("Error when loading transactions: %#v", err)
+		return tr, err, false
+	}
+	if err = Transactions_FillMovements(&tr); err != nil {
+		return tr, err, false
+	}
+	if err = Transactions_FillItems(&tr); err != nil {
+		return tr, err, false
+	}
+	return tr, nil, false
+}
+
 func Transactions_FillMovements(transaction *Transaction) error {
 	transaction.Movements = make([]Movement, 0)
 	rows, err := DB.Query("SELECT `ID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `Status`, `LocalDate`, `Notes` FROM `movements` WHERE `TransactionID` = ? ORDER BY `LocalDate`, `Amount`", transaction.ID)

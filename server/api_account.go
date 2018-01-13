@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 
 	"github.com/gjvnq/wedge2/domain"
 )
@@ -17,7 +16,7 @@ func AccountList(w http.ResponseWriter, r *http.Request) {
 	// List Accounts
 	accounts, err := wedge.Accounts_InBook(GetBookId(r))
 	if err != nil {
-		http.Error(w, "", 500)
+		SendErrCodeAndLog(w, 500, err)
 		return
 	}
 
@@ -33,7 +32,7 @@ func AccountTree(w http.ResponseWriter, r *http.Request) {
 	// List Accounts
 	accounts, err := wedge.Accounts_InBook(GetBookId(r))
 	if err != nil {
-		http.Error(w, "", 500)
+		SendErrCodeAndLog(w, 500, err)
 		return
 	}
 
@@ -45,7 +44,7 @@ func AccountSet(w http.ResponseWriter, r *http.Request) {
 	account := wedge.Account{}
 	err := json.NewDecoder(r.Body).Decode(&account)
 	if err != nil {
-		http.Error(w, err.Error(), 400)
+		SendErrCodeAndLog(w, 400, err)
 		return
 	}
 
@@ -57,13 +56,11 @@ func AccountSet(w http.ResponseWriter, r *http.Request) {
 	// Put on database
 	err = wedge.Accounts_Set(&account)
 	if err != nil {
-		if strings.Contains(err.Error(), "Duplicate entry") {
-			if err != nil {
-				http.Error(w, "duplicate entry", 409)
-				return
-			}
+		if IsDuplicate(err) {
+			SendErrCodeAndLog(w, 409, err)
+			return
 		}
-		http.Error(w, "", 500)
+		SendErrCodeAndLog(w, 500, err)
 		return
 	}
 

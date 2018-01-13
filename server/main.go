@@ -54,6 +54,7 @@ func main() {
 	router.HandleFunc("/books/{book-id}/accounts", AccountSet).Methods("PUT")
 	router.HandleFunc("/books/{book-id}/transactions", TransactionSet).Methods("PUT")
 	router.HandleFunc("/books/{book-id}/transactions", TransactionList).Methods("GET")
+	router.HandleFunc("/books/{book-id}/transactions/{tr-id}", TransactionGet).Methods("GET")
 	router.HandleFunc("/auth", Auth).Methods("POST")
 	router.HandleFunc("/auth/test", AuthTest).Methods("POST")
 
@@ -117,6 +118,35 @@ func GetUUID(key string, r *http.Request) uuid.UUID {
 	return uuid.FromStringOrNil(vars[key])
 }
 
+func SendErrCode(w http.ResponseWriter, code int) {
+	switch code {
+	case 400:
+		http.Error(w, "400 Bad Request", 400)
+	case 401:
+		http.Error(w, "401 Unauthorized Error", 401)
+	case 404:
+		http.Error(w, "404 Not Found Error", 404)
+	case 403:
+		http.Error(w, "403 Forbidden Error", 403)
+	case 409:
+		http.Error(w, "409 Conflict", 409)
+	case 500:
+		http.Error(w, "500 Internal Server Error", 500)
+	default:
+		Log.Warning("Unknown http error code:", code)
+		http.Error(w, "", code)
+	}
+}
+
+func SendErrCodeAndLog(w http.ResponseWriter, code int, err interface{}) {
+	Log.WarningNF(1, "Sending %d HTTP Error Code due to: %v", code, err)
+	SendErrCode(w, code)
+}
+
+func Is404(err error) bool {
+	return err == sql.ErrNoRows
+}
+
 func IsDuplicate(err error) bool {
-	return strings.HasPrefix(err.Error(), "duplicate entry")
+	return strings.Contains(strings.ToLower(err.Error()), "duplicate entry")
 }

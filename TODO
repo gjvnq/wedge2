@@ -1,0 +1,7 @@
+[ ] Edit a transaction
+[ ] Edit an asset's value
+[ ] Filter transactions by time period
+[ ] Plot account's totals over a time period
+    [ ] With the assets (raw value) in a stacked line chart
+    [ ] With the assets (value converted to specified currency) in a stacked line chart
+    [ ] With total (converted to specified currency) in a single line chart

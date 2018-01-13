@@ -9,6 +9,7 @@ export default new Vuex.Store({
   strict: true,
   state: {
     assets: [],
+    assetsByID: {},
     assetsLoading: false,
     accounts: [],
     accountsTree: {},
@@ -17,6 +18,11 @@ export default new Vuex.Store({
   mutations: {
     setAssets (state, newAssets) {
       state.assets = newAssets
+      state.assetsByID = {}
+      for (var i = 0; i < newAssets.length; i++) {
+        var asset = newAssets[i]
+        state.assetsByID[asset.id] = asset
+      }
     },
     setAssetsLoading (state, flag) {
       state.assetsLoading = flag

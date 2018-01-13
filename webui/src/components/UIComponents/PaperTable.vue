@@ -1,12 +1,12 @@
 <template>
   <div>
-    <div class="header">
+    <div class="header" v-if="title != '' && subTitle != ''">
       <slot name="header">
-        <h4 class="title">{{title}}</h4>
-        <p class="category">{{subTitle}}</p>
+        <h4 class="title" v-if="title != ''">{{title}}</h4>
+        <p class="category" v-if="subTitle != ''">{{subTitle}}</p>
       </slot>
     </div>
-    <div class="content table-responsive table-full-width">
+    <div class="content table-responsive table-full-width paper-table">
       <table class="table" :class="tableClass">
         <thead>
           <th v-for="column in columns">{{$t(column)}}</th>
@@ -14,7 +14,7 @@
         </thead>
         <tbody>
           <tr v-for="item in data" :class="trClass" @click="click_event(item)">
-            <td v-for="(column, col_index) in columns" :class="itemClass(col_index)" v-if="hasValue(item, column)">{{itemValue(item, column)}}</td>
+            <td v-for="(column, col_index) in columns" :class="itemClass(col_index)" v-if="hasValue(item, column, col_index)">{{itemValue(item, column, col_index)}}</td>
             <td v-html="itemValue(item, '_extra')"></td>
           </tr>
         </tbody>
@@ -27,6 +27,10 @@
     props: {
       columns: Array,
       columnsStyles: Array,
+      columnsProperties: {
+        type: Array,
+        default: () => []
+      },
       data: Array,
       click_callback: Function,
       type: {
@@ -54,10 +58,13 @@
       }
     },
     methods: {
-      hasValue (item, column) {
-        return item[column.toLowerCase()] !== 'undefined'
+      hasValue (item, column, index) {
+        return this.itemValue(item, column, index) !== 'undefined'
       },
-      itemValue (item, column) {
+      itemValue (item, column, index) {
+        if (this.columnsProperties.length !== 0) {
+          return item[this.columnsProperties[index]]
+        }
         return item[column.toLowerCase()]
       },
       itemClass (index) {

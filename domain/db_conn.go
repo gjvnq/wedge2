@@ -237,6 +237,7 @@ func Transactions_FillMovements(transaction *Transaction) error {
 		}
 		transaction.Movements = append(transaction.Movements, movement)
 	}
+	transaction.ComputeTotals()
 	return nil
 }
 

@@ -61,3 +61,10 @@ input, select {
 .click-cursor {
 	cursor: pointer;
 }
+
+.paper-table {
+	tbody td,
+	thead th {
+	  padding-left: 2em !important;
+	}
+}

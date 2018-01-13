@@ -130,21 +130,21 @@ func (ld *LDate) Scan(value interface{}) error {
 		ld.day = 0
 		return nil
 	}
-	if iv, err := driver.Int32.ConvertValue(value); err == nil {
+	if int32v, err := driver.Int32.ConvertValue(value); err == nil {
 		v := 0
-		switch iv.(type) {
+		switch iv := int32v.(type) {
 		case int:
-			v = int(v)
+			v = int(iv)
 		case int32:
-			v = int(v)
+			v = int(iv)
 		case int64:
-			v = int(v)
+			v = int(iv)
 		default:
 			return errors.New("failed to scan LDate (#1)")
 		}
 		ld.year = v / int(1E4)
 		v = v % int(1E4)
-		ld.month = v
+		ld.month = v / 1E2
 		ld.day = v % int(1E2)
 		return nil
 	}

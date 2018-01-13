@@ -1,21 +1,21 @@
 <template>
   <div class="row">
     <div class="col-md-2">
-      <selector label="Account" v-model="value.account" :list="accountsList" @change="onChange" :disabled="disabled"/>
+      <selector label="Account" v-model="value.account_id" :list="accountsList" @change="onChange" :disabled="disabled"/>
     </div>
     <div class="col-md-2">
       <div class="form-group">
         <label>{{$t('Value')}}</label>
-        <input type="text" class="form-control border-input" v-model.number="value.amount" @change="onChange" :disabled="disabled"/>
+        <input type="text" class="form-control border-input" v-model.number="value.amount_user" @change="onChange" :disabled="disabled"/>
       </div>
     </div>
     <div class="col-md-3">
-      <asset-selector label="Currency or Asset" v-model="value.asset" :list="assetsList" @change="onChange" :disabled="disabled"/>
+      <asset-selector label="Currency or Asset" v-model="value.asset_id" :list="assetsList" @change="onChange" :disabled="disabled"/>
     </div>
     <div class="col-md-2">
       <div class="form-group">
         <label>{{$t('Date')}}</label>
-        <input type="date" class="form-control border-input" v-model="value.date" @change="onChange" :disabled="disabled"/>
+        <input type="date" class="form-control border-input" v-model="value.local_date" @change="onChange" :disabled="disabled"/>
       </div>
     </div>
     <div class="col-md-2">
@@ -49,7 +49,7 @@
         default: false
       },
       value: {
-        account: {
+        account_id: {
           type: String,
           default: ''
         },
@@ -57,15 +57,15 @@
           type: Number,
           default: 0
         },
-        amount_int: {
+        amount_user: {
           type: Number,
           default: 0
         },
-        asset: {
+        asset_id: {
           type: String,
           default: ''
         },
-        date: {
+        local_date: {
           type: Date,
           default: new Date()
         },
@@ -76,18 +76,18 @@
       }
     },
     beforeMount () {
-      if (this.value.amount_int !== undefined && this.value.amount_int !== 0) {
-        this.setAmountInt(this.value.amount_int)
+      if (this.value.amount !== undefined && this.value.amount !== 0) {
+        this.setAmount(this.value.amount)
       }
     },
     methods: {
       onChange (e) {
-        this.value.amount_int = Math.floor(this.value.amount * 1E8)
+        this.value.amount = Math.floor(this.value.amount_user * 1E8)
         this.$emit('change', this.value)
       },
-      setAmountInt (amount) {
-        this.value.amount_int = amount
-        this.value.amount = this.value.amount_int / 1E8
+      setAmount (amount) {
+        this.value.amount = amount
+        this.value.amount_user = this.value.amount / 1E8
       },
       deleteMe () {
         if (this.deleteCallback !== undefined) {

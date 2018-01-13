@@ -10,7 +10,7 @@
       <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Unit Value')}}</label>
-          <input type="text" class="form-control border-input" v-model.number="value.unit_cost" @input="calcFromUnit" :disabled="disabled" @change="onChange">
+          <input type="text" class="form-control border-input" v-model.number="value.unit_cost_user" @input="calcFromUnit" :disabled="disabled" @change="onChange">
         </div>
       </div>
       <div class="col-md-2">
@@ -22,12 +22,12 @@
       <div class="col-md-2">
         <div class="form-group">
           <label>{{$t('Total Value')}}</label>
-          <input type="text" class="form-control border-input" v-model.number="value.total_cost" @input="calcFromTotal" :disabled="disabled" @change="onChange">
+          <input type="text" class="form-control border-input" v-model.number="value.total_cost_user" @input="calcFromTotal" :disabled="disabled" @change="onChange">
         </div>
       </div>
 
       <div class="col-md-3">
-        <asset-selector label="Currency or Asset" v-model="value.asset" :list="assetsList" :disabled="disabled" @change="onChange"/>
+        <asset-selector label="Currency or Asset" v-model="value.asset_id" :list="assetsList" :disabled="disabled" @change="onChange"/>
       </div>
     </div>
     <div class="row">
@@ -88,7 +88,7 @@
           type: Number,
           default: 0
         },
-        unit_cost_int: {
+        unit_cost_user: {
           type: Number,
           default: 0
         },
@@ -96,15 +96,15 @@
           type: Number,
           default: 0
         },
-        total_cost_int: {
-          type: Number,
-          default: 0
-        },
         total_cost: {
           type: Number,
           default: 0
         },
-        asset: {
+        total_cost_user: {
+          type: Number,
+          default: 0
+        },
+        asset_id: {
           type: String,
           default: ''
         },
@@ -123,16 +123,16 @@
       }
     },
     beforeMount () {
-      if (this.value.unit_cost_int !== undefined && this.value.unit_cost_int !== 0) {
-        this.setUnitCostInt(this.value.unit_cost_int)
+      if (this.value.unit_cost !== undefined && this.value.unit_cost !== 0) {
+        this.setUnitCost(this.value.unit_cost)
       }
-      if (this.value.total_cost_int !== undefined && this.value.total_cost_int !== 0) {
-        this.setTotalCostInt(this.value.total_cost_int)
+      if (this.value.total_cost !== undefined && this.value.total_cost !== 0) {
+        this.setTotalCost(this.value.total_cost)
       }
     },
     methods: {
       onChange (e) {
-        this.value.total_cost_int = Math.floor(this.value.total_cost * 1E8)
+        this.value.total_cost_user = Math.floor(this.value.total_cost * 1E8)
         this.$emit('change', this.value)
       },
       deleteMe () {
@@ -140,13 +140,13 @@
           this.deleteCallback(this.index)
         }
       },
-      setUnitCostInt (unitCost) {
-        this.value.unit_cost_int = unitCost
-        this.value.unit_cost = this.value.unit_cost_int / 1E8
+      setUnitCost (unitCost) {
+        this.value.unit_cost = unitCost
+        this.value.unit_cost_user = this.value.unit_cost / 1E8
       },
-      setTotalCostInt (totalCost) {
-        this.value.total_cost_int = totalCost
-        this.value.total_cost = this.value.total_cost_int / 1E8
+      setTotalCost (totalCost) {
+        this.value.total_cost = totalCost
+        this.value.total_cost_user = this.value.total_cost / 1E8
       },
       calcFromUnit () {
         if (this.value.quantity !== undefined && this.value.quantity !== 0) {

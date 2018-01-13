@@ -8,7 +8,7 @@ import Overview from 'src/components/Dashboard/Views/Overview.vue'
 import Assets from 'src/components/Dashboard/Views/Assets.vue'
 import Accounts from 'src/components/Dashboard/Views/Accounts.vue'
 import Transactions from 'src/components/Dashboard/Views/Transactions.vue'
-import AddTransaction from 'src/components/Dashboard/Views/AddTransaction.vue'
+import EditTransaction from 'src/components/Dashboard/Views/EditTransaction.vue'
 
 const routes = [
   {
@@ -46,9 +46,9 @@ const routes = [
         component: Transactions
       },
       {
-        path: 'transactions/add',
+        path: 'transactions/edit/:tr_id',
         name: 'Add Transaction',
-        component: AddTransaction
+        component: EditTransaction
       }
     ]
   },

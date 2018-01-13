@@ -3,7 +3,7 @@
     <div class="col-md-12">
       <div class="card">
         <div class="content">
-          <h4 class="title">{{$t('Transactions')}} <router-link to="transactions/add">({{$t('Add')}})</router-link></h4>
+          <h4 class="title">{{$t('Transactions')}} <router-link to="transactions/edit/new">({{$t('Add')}})</router-link></h4>
           <paper-table :data="transactions" :columns="tblColumns" :columnsStyles="tblStyles" :click_callback="tblClickCallback" :columnsProperties="tblColumnProperties"/>
         </div>
       </div>
@@ -70,7 +70,10 @@
         tblColumns: [...tableColumns],
         tblStyles: [...tableColumnsStyle],
         tblColumnProperties: [...tableColumnsProperties],
-        tblClickCallback: undefined
+        tblClickCallback: function (el) {
+          console.log(el.id)
+          this.$router.push('transactions/edit/' + el.id)
+        }
       }
     }
   }

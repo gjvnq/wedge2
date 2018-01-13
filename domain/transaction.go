@@ -10,9 +10,9 @@ type Transaction struct {
 	LocalDate LDate     `json:"local_date"`
 	BookID    uuid.UUID `json:"book_id"`
 	// Associations
-	Movements []Movement          `json:"movements,omitempty"`
-	Items     []Item              `json:"items,omitempty"`
-	Totals    map[uuid.UUID]int64 `json:"totals,omitempty"`
+	Movements []Movement          `json:"movements"`
+	Items     []Item              `json:"items"`
+	Totals    map[uuid.UUID]int64 `json:"totals"`
 }
 
 func (tr *Transaction) Init() {

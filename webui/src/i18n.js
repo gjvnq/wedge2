@@ -46,6 +46,9 @@ export const messages = {
     'Wrong password :-(': 'Senha errada :-(',
     'No such book :-(': 'Livro não existe :-(',
     'No parent account': 'Nenhuma conta pai',
-    'Add Account': 'Adicionar Conta'
+    'Add Account': 'Adicionar Conta',
+    'Failed to talk to server': 'Falha ao falar com o servidor',
+    'Transaction edited': 'Transação editada',
+    'Loading transaction...': 'Carregando transação'
   }
 }

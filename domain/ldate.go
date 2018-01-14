@@ -146,6 +146,12 @@ func (ld *LDate) Scan(value interface{}) error {
 		v = v % int(1E4)
 		ld.month = v / 1E2
 		ld.day = v % int(1E2)
+		if ld.year < 1582 && ld.year != 0 {
+			return errors.New("year must be 1582 or after")
+		}
+		if ld.year > 9999 {
+			return errors.New("year must be 9999 or earlier")
+		}
 		return nil
 	}
 	return errors.New("failed to scan LDate (#2)")
@@ -165,7 +171,7 @@ func (ld *LDate) UnmarshalJSON(raw_data []byte) error {
 		Log.Error(err)
 		return errors.New("'" + numbers[0] + "' is not a valid integer")
 	}
-	if ld.year < 1582 {
+	if ld.year < 1582 && ld.year != 0 {
 		return errors.New("year must be 1582 or after")
 	}
 	if ld.year > 9999 {

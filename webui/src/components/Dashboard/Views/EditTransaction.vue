@@ -4,16 +4,16 @@
       <div class="card">
         <div class="content">
           <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-6" :class="{ 'has-error': nameErr }">
               <div class="form-group">
                 <label>{{$t('Name')}}</label>
-                <input type="text" class="form-control border-input" v-model="transactionName" :disabled="saving || all_disabled">
+                <input type="text" class="form-control border-input" v-model="value.name" :disabled="saving || all_disabled" @input="validateBasic">
               </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-md-4" :class="{ 'has-error': dateErr }">
               <div class="form-group">
                 <label>{{$t('Date')}}</label>
-                <input type="date" class="form-control border-input" v-model="transactionDate" :disabled="saving || all_disabled">
+                <input type="date" class="form-control border-input" v-model="value.local_date" :disabled="saving || all_disabled" @input="validateBasic">
               </div>
             </div>
             <div class="col-md-2">
@@ -34,11 +34,11 @@
     <div class="row">
       <h4>{{ $t("Movements" )}}</h4>
     </div>
-    <div class="row" v-for="(movement, index) in movements">
+    <div class="row" v-for="(movement, index) in value.movements">
       <div class="col-md-12">
         <div class="card">
           <div class="content">
-            <movement :accountsList="accountsList" :assetsList="assetsList" v-model="movements[index]" :index="index" :delete-callback="deleteMovement" @change="autoSetAssetMov" :disabled="saving || all_disabled"></movement>
+            <movement ref="movements" :accountsList="accountsList" :assetsList="assetsList" v-model="value.movements[index]" :index="index" :delete-callback="deleteMovement" @change="autoSetAssetMov" :disabled="saving || all_disabled"></movement>
           </div>
         </div>
       </div>
@@ -56,11 +56,11 @@
     <div class="row">
       <h4>{{ $t("Items" )}}</h4>
     </div>
-    <div class="row" v-for="(item, index) in items">
+    <div class="row" v-for="(item, index) in value.items">
       <div class="col-md-12">
         <div class="card">
           <div class="content">
-            <item :assetsList="assetsList" v-model="items[index]" :index="index" :delete-callback="deleteItem" :disabled="saving || all_disabled"></item>
+            <item ref="items" :assetsList="assetsList" v-model="value.items[index]" :index="index" :delete-callback="deleteItem" :disabled="saving || all_disabled"></item>
           </div>
         </div>
       </div>
@@ -101,25 +101,69 @@
     },
     methods: {
       start () {
-        this.transactionID = ''
+        this.value = {
+          id: undefined,
+          name: '',
+          local_date: undefined,
+          movements: [{}],
+          items: []
+        }
         this.transactionName = ''
         this.transactionDate = ''
         this.saving = false
         this.default_asset = ''
-        this.movements = [{}]
-        this.items = []
+        this.value.movements = [{}]
+        this.value.items = []
         this.flagOk = false
         this.flagErrConn = false
         this.flagLoading = false
+        this.nameErr = false
+        this.dateErr = false
         this.warn_zero_sum = false
         this.all_disabled = false
         if (this.$route.params.tr_id !== 'new') {
-          this.transactionID = this.$route.params.tr_id
+          this.value.id = this.$route.params.tr_id
           this.all_disabled = true
-          this.movements = []
-          this.items = []
-          this.loadAndFillTransaction(this.transactionID)
+          this.value.movements = []
+          this.value.items = []
+          this.loadAndFillTransaction(this.value.id)
         }
+      },
+      notifyVue (kind, icon, msg) {
+        if (!['info', 'success', 'warning', 'danger'].includes(kind)) {
+          kind = 'info'
+        }
+        this.$notifications.notify(
+          {
+            message: this.$t(msg),
+            icon: icon,
+            horizontalAlign: 'center',
+            verticalAlign: 'top',
+            type: kind
+          })
+      },
+      validateBasic () {
+        this.nameErr = (this.value.name === undefined || this.value.name === '')
+        this.dateErr = (this.value.local_date === undefined || this.value.local_date.substr(0, 4) === '0000')
+        return !(this.nameErr || this.dateErr)
+      },
+      validate () {
+        var failedValidation = false
+
+        failedValidation |= !this.validateBasic()
+
+        if (this.value.movements.length > 0) {
+          for (let mov of this.$refs.movements) {
+            failedValidation |= mov.validate()
+          }
+        }
+        if (this.value.items.length > 0) {
+          for (let item of this.$refs.items) {
+            failedValidation |= item.validate()
+          }
+        }
+
+        return !failedValidation
       },
       loadAndFillTransaction (id) {
         if (this.flagLoading) {
@@ -127,42 +171,41 @@
         }
         this.flagLoading = true
         this.$http.get('books/{book-id}/transactions/' + id).then(response => { // Success
-          if (this.transactionID === response.body.id) {
-            this.transactionName = response.body.name
-            this.transactionDate = response.body.local_date
-            this.movements = response.body.movements
-            this.items = response.body.items
+          if (this.value.id === response.body.id) {
+            this.value = response.body
           }
           this.all_disabled = false
           this.flagLoading = false
         }, response => { // Error
           console.log('err', response)
-          if (this.transactionID !== '') {
+          if (this.value.id !== '') {
             this.flagLoading = false
             this.flagErrConn = true
           }
         })
       },
       addMovement () {
-        this.movements.push({})
+        this.value.movements.push({})
       },
       addItem () {
-        this.items.push({asset: this.default_asset})
+        this.value.items.push({asset: this.default_asset})
       },
       deleteItem (index) {
-        this.items.splice(index, 1)
+        this.value.items.splice(index, 1)
+        this.validate()
       },
       deleteMovement (index) {
-        this.movements.splice(index, 1)
+        this.value.movements.splice(index, 1)
+        this.validate()
       },
       autoSetAssetMov () {
-        if (this.movements.length === 0) {
+        if (this.value.movements.length === 0) {
           // Array is too small
           return
         }
 
-        let asset = this.movements[0].asset
-        for (let movement of this.movements) {
+        let asset = this.value.movements[0].asset
+        for (let movement of this.value.movements) {
           if (movement.asset !== asset) {
             // Assets are not consistent
             this.default_asset = ''
@@ -173,72 +216,46 @@
 
         // Check for sum
         this.warn_zero_sum = false
-        if (this.movements.length === 2) {
-          var prod = this.movements[0].amount * this.movements[1].amount
-          var sum = this.movements[0].amount + this.movements[1].amount
-          if (prod < 0 && sum !== 0) {
+        if (this.value.movements.length === 2) {
+          var prod = this.value.movements[0].amount * this.value.movements[1].amount
+          var sum = this.value.movements[0].amount + this.value.movements[1].amount
+          var equalAssets = (this.value.movements[0].asset_id === this.value.movements[1].asset_id)
+          if (prod < 0 && sum !== 0 && equalAssets) {
             this.warn_zero_sum = true
           }
         }
       },
       save () {
+        // Do not save twice at the same time
         if (this.saving === true) {
           return
         }
         this.saving = false
-        // Data
-        var fd = {}
-        fd['id'] = this.transactionID
-        fd['name'] = this.transactionName
-        fd['local_date'] = this.transactionDate
-        fd['movements'] = []
-        for (let movement of this.movements) {
-          let fd2 = {}
-          fd2['account_id'] = movement.account_id
-          fd2['asset_id'] = movement.asset_id
-          fd2['amount'] = movement.amount
-          fd2['status'] = movement.status
-          fd2['local_date'] = movement.local_date
-          console.log(movement.local_date.slice(0, 4))
-          if (movement.local_date.slice(0, 4) === '0000') {
-            return
-          }
-          fd['movements'].push(fd2)
-        }
-        fd['items'] = []
-        for (let item of this.items) {
-          let fd2 = {}
-          fd2['name'] = item.name
-          fd2['asset_id'] = item.asset_id
-          fd2['unit_cost'] = item.unit_cost
-          fd2['total_cost'] = item.total_cost
-          fd2['quantity'] = item.quantity
-          fd2['period_start'] = item.start
-          fd2['period_end'] = item.end
-          fd2['tags'] = item.tags_list
-          fd['items'].push(fd2)
+        // Validate before saving
+        if (!this.validate()) {
+          return
         }
         // Send request
-        this.$http.put('books/{book-id}/transactions', fd).then(response => { // Success
+        this.$http.put('books/{book-id}/transactions', this.value).then(response => { // Success
           this.saving = false
+          this.notifyVue('success', 'ti-save', 'Transaction edited')
           this.updateTransactions()
         }, response => { // Error
           console.log('err', response)
           this.saving = false
-          alert(response.bodyText)
+          this.notifyVue('danger', 'ti-alert', this.$t('Failed to talk to server') + ': ' + response.bodyText)
           this.updateTransactions()
         })
       },
       clear () {
         this.movments = [{}]
-        this.items = []
+        this.value.items = []
         this.transactionName = ''
         this.transactionDate = ''
         this.flagErrConn = false
         this.flagOk = false
       },
       updateTransactions () {
-        this.$store.dispatch('updateTransactions')
       }
     },
     computed: {
@@ -251,18 +268,22 @@
     },
     data () {
       return {
-        transactionID: '',
-        transactionName: '',
-        transactionDate: '',
+        value: {
+          id: undefined,
+          name: '',
+          local_date: undefined,
+          movements: [{}],
+          items: []
+        },
         saving: false,
         default_asset: '',
-        movements: [{}],
-        items: [],
         flagOk: false,
         flagErrConn: false,
         flagLoading: false,
         warn_zero_sum: false,
-        all_disabled: false
+        all_disabled: false,
+        nameErr: false,
+        dateErr: false
       }
     }
   }

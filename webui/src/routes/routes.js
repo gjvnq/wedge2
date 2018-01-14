@@ -46,7 +46,7 @@ const routes = [
         component: Transactions
       },
       {
-        path: 'transactions/edit/:tr_id',
+        path: 'transactions/:tr_id',
         name: 'Add Transaction',
         component: EditTransaction
       }

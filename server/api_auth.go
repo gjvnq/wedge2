@@ -17,7 +17,7 @@ type AuthReq struct {
 	Password string    `json:"password"`
 }
 
-const DEFAULT_TOKEN_LIFE = 60 * time.Minute
+const DEFAULT_TOKEN_LIFE = 600 * time.Minute
 
 func Auth(w http.ResponseWriter, r *http.Request) {
 	// Load request parameters

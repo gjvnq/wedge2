@@ -1,11 +1,16 @@
 package wedge
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
 
 	"github.com/gjvnq/go.uuid"
 )
+
+type AccountsDBConn struct{}
+
+var Accounts AccountsDBConn
 
 type Account struct {
 	ID       uuid.UUID `json:"id" gorm:"primary_key"`
@@ -44,4 +49,48 @@ func account_tree_body(root *Account, input []Account, mask map[uuid.UUID]bool) 
 			root.Children = append(root.Children, account)
 		}
 	}
+}
+
+func (this AccountsDBConn) InBook(book_id uuid.UUID) ([]Account, error) {
+	accounts := make([]Account, 0)
+	rows, err := DB.Query("SELECT `ID`, `ParentID`, `Name`, `BookID` FROM `accounts` WHERE `BookID` = ? ORDER BY `Name`", book_id)
+	if err == sql.ErrNoRows {
+		return nil, err
+	}
+	if err != nil {
+		Log.WarningF("Error when loading accounts: %#v", err)
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		account := Account{}
+		err = rows.Scan(
+			&account.ID,
+			&account.ParentID,
+			&account.Name,
+			&account.BookID)
+		if err != nil {
+			Log.WarningF("Error when loading account %s: %#v", account.ID.String(), err)
+			return nil, err
+		}
+		accounts = append(accounts, account)
+	}
+	return accounts, nil
+}
+
+func (this AccountsDBConn) Set(account *Account) error {
+	// If the ID is nil, assume it is a new account and give it a new ID
+	if account.ID.IsNil() {
+		account.ID = uuid.NewV4()
+	}
+	_, err := DB.Exec("REPLACE INTO `accounts` VALUE (?, ?, ?, ?)",
+		account.ID,
+		account.ParentID,
+		account.Name,
+		account.BookID)
+	if err != nil {
+		Log.WarningF("Error when updating account %s %s: %#v", account.ID, account.Name, err)
+		return FixError(err)
+	}
+	return nil
 }

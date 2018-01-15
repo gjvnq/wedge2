@@ -55,6 +55,7 @@ func main() {
 	router.HandleFunc("/books/{book-id}/transactions", TransactionSet).Methods("PUT")
 	router.HandleFunc("/books/{book-id}/transactions", TransactionList).Methods("GET")
 	router.HandleFunc("/books/{book-id}/transactions/{tr-id}", TransactionGet).Methods("GET")
+	router.HandleFunc("/books/{book-id}/transactions/{tr-id}", TransactionRm).Methods("DELETE")
 	router.HandleFunc("/auth", Auth).Methods("POST")
 	router.HandleFunc("/auth/test", AuthTest).Methods("POST")
 
@@ -120,6 +121,12 @@ func GetUUID(key string, r *http.Request) uuid.UUID {
 
 func SendErrCode(w http.ResponseWriter, code int) {
 	switch code {
+	case 200:
+		http.Error(w, "200 OK", 200)
+	case 201:
+		http.Error(w, "201 Created", 201)
+	case 202:
+		http.Error(w, "202 Accepted", 202)
 	case 400:
 		http.Error(w, "400 Bad Request", 400)
 	case 401:

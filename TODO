@@ -1,6 +1,9 @@
 [X] Edit a transaction
-[ ] Delete a transaction
+[X] Delete a transaction
 [ ] Edit an asset's value
+[ ] Delete an asset
+[ ] Automatically load asset value for currencies
+[ ] Automatically load asset value for B3
 [ ] Filter transactions by time period
 [ ] Plot account's totals over a time period
     [ ] With the assets (raw value) in a stacked line chart

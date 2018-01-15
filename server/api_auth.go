@@ -33,7 +33,7 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Load book
-	book, err, not_found := wedge.Books_GetByID(auth_req.BookID)
+	book, err, not_found := wedge.Books.GetByID(auth_req.BookID)
 	if not_found {
 		SendErrCodeAndLog(w, 404, err)
 		return

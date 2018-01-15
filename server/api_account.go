@@ -14,7 +14,7 @@ func AccountList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// List Accounts
-	accounts, err := wedge.Accounts_InBook(GetBookId(r))
+	accounts, err := wedge.Accounts.InBook(GetBookId(r))
 	if err != nil {
 		SendErrCodeAndLog(w, 500, err)
 		return
@@ -30,7 +30,7 @@ func AccountTree(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// List Accounts
-	accounts, err := wedge.Accounts_InBook(GetBookId(r))
+	accounts, err := wedge.Accounts.InBook(GetBookId(r))
 	if err != nil {
 		SendErrCodeAndLog(w, 500, err)
 		return
@@ -54,7 +54,7 @@ func AccountSet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Put on database
-	err = wedge.Accounts_Set(&account)
+	err = wedge.Accounts.Set(&account)
 	if err != nil {
 		if IsDuplicate(err) {
 			SendErrCodeAndLog(w, 409, err)

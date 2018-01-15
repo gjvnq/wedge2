@@ -14,7 +14,7 @@ func AssetsList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// List Assets
-	assets, err := wedge.Assets_InBook(GetBookId(r))
+	assets, err := wedge.Assets.InBook(GetBookId(r))
 	if err != nil {
 		SendErrCodeAndLog(w, 500, err)
 		return
@@ -38,7 +38,7 @@ func AssetsPut(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Put on database
-	err = wedge.Assets_Set(&asset)
+	err = wedge.Assets.Set(&asset)
 	if err != nil {
 		if IsDuplicate(err) {
 			SendErrCodeAndLog(w, 409, err)

@@ -8,7 +8,7 @@ import (
 
 func BooksList(w http.ResponseWriter, r *http.Request) {
 	// Load books
-	books, err := wedge.Books_All(true)
+	books, err := wedge.Books.All(true)
 	if err != nil {
 		SendErrCodeAndLog(w, 500, err)
 		return

@@ -10,16 +10,22 @@
                 <input type="text" class="form-control border-input" v-model="value.name" :disabled="saving || all_disabled" @input="validateBasic">
               </div>
             </div>
-            <div class="col-md-4" :class="{ 'has-error': dateErr }">
+            <div class="col-md-3" :class="{ 'has-error': dateErr }">
               <div class="form-group">
                 <label>{{$t('Date')}}</label>
                 <input type="date" class="form-control border-input" v-model="value.local_date" :disabled="saving || all_disabled" @input="validateBasic">
               </div>
             </div>
+            <div class="col-md-1">
+              <div class="form-group" v-if="value.id !== undefined">
+                <div style="height: 27px"></div>
+                <button class="btn btn-danger btn-fill" @click="deleteMe" :disabled="saving || all_disabled"><span class="ti-trash"></span></button>
+              </div>
+            </div>
             <div class="col-md-2">
               <div class="form-group">
                 <div style="height: 27px"></div>
-                <button class="btn btn-info btn-fill btn-wd" :disabled="saving == true || all_disabled" @click="save">{{$t('Save')}}</button>
+                <button class="btn btn-info btn-fill btn-wd" :disabled="saving || all_disabled" @click="save">{{$t('Save')}}</button>
               </div>
             </div>
           </div>
@@ -108,12 +114,8 @@
           movements: [{}],
           items: []
         }
-        this.transactionName = ''
-        this.transactionDate = ''
         this.saving = false
         this.default_asset = ''
-        this.value.movements = [{}]
-        this.value.items = []
         this.flagOk = false
         this.flagErrConn = false
         this.flagLoading = false
@@ -128,6 +130,22 @@
           this.value.items = []
           this.loadAndFillTransaction(this.value.id)
         }
+      },
+      deleteMe () {
+        if (!confirm(this.$t('Do you really want to DELETE this transaction?'))) {
+          return
+        }
+        this.saving = true
+        this.$http.delete('books/{book-id}/transactions/' + this.value.id, this.value).then(response => { // Success
+          this.saving = false
+          this.notifyVue('success', 'ti-trash', 'Transaction removed')
+          this.updateTransactions()
+        }, response => { // Error
+          console.log('err', response)
+          this.saving = false
+          this.notifyVue('danger', 'ti-alert', this.$t('Failed to talk to server') + ': ' + response.bodyText)
+          this.updateTransactions()
+        })
       },
       notifyVue (kind, icon, msg) {
         if (!['info', 'success', 'warning', 'danger'].includes(kind)) {

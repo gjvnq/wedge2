@@ -14,7 +14,7 @@ func TransactionList(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// List Transactions
-	transactions, err := wedge.Transactions_InBook(GetBookId(r))
+	transactions, err := wedge.Transactions.InBook(GetBookId(r))
 	if err != nil {
 		SendErrCodeAndLog(w, 500, err)
 		return
@@ -39,7 +39,7 @@ func TransactionSet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Put on database
-	err = wedge.Transactions_Set(&transaction)
+	err = wedge.Transactions.Set(&transaction)
 	if err != nil {
 		if IsDuplicate(err) {
 			SendErrCodeAndLog(w, 409, err)
@@ -59,7 +59,7 @@ func TransactionGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get Transaction
-	tr, err, not_found := wedge.Transactions_GetByID(GetUUID("tr-id", r))
+	tr, err, not_found := wedge.Transactions.GetByID(GetUUID("tr-id", r))
 	if not_found {
 		SendErrCodeAndLog(w, 404, err)
 		return
@@ -77,4 +77,37 @@ func TransactionGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sendJSONResponse(w, tr)
+}
+
+func TransactionRm(w http.ResponseWriter, r *http.Request) {
+	// Check auth
+	if IsAuthInvalid(w, r) {
+		return
+	}
+
+	// Get Transaction
+	tr, err, not_found := wedge.Transactions.GetByID(GetUUID("tr-id", r))
+	Log.Debug(tr, err, not_found)
+	if not_found {
+		SendErrCode(w, 404)
+		return
+	} else if err != nil {
+		SendErrCodeAndLog(w, 500, err)
+		return
+	}
+
+	// Check auth
+	if !tr.BookID.Equal(GetBookId(r)) {
+		SendErrCode(w, 403)
+		return
+	}
+
+	// Actually delete
+	err = wedge.Transactions.RmByID(tr.ID)
+	if err != nil {
+		SendErrCodeAndLog(w, 500, err)
+		return
+	}
+
+	SendErrCode(w, 200)
 }

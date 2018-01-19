@@ -12,7 +12,7 @@
       <dashboard-content @click.native="toggleSidebar">
       </dashboard-content>
 
-      <content-footer></content-footer>
+      <content-footer @click.native="toggleSidebar"></content-footer>
     </div>
   </div>
 </template>
@@ -32,9 +32,9 @@
     beforeMount () {
     },
     methods: {
-      toggleSidebar () {
+      toggleSidebar (e) {
         if (this.$sidebar.showSidebar) {
-          this.$sidebar.displaySidebar(false)
+          this.$sidebar.showSidebar = false
         }
       }
     },

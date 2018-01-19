@@ -87,6 +87,10 @@
 /*          Changes for small display      */
 
 @media (max-width: 991px) {
+  .row h4 {
+    text-align: center;
+  }
+
   .sidebar {
     display: none;
   }
@@ -134,7 +138,7 @@
     top: 0;
     height: 100%;
     width: 230px;
-    right: 0;
+    left: 0;
     z-index: 1032;
     visibility: visible;
     background-color: #999;
@@ -144,7 +148,7 @@
     padding-right: 0px;
     padding-left: 0;
 
-    @include transform-translate-x(230px);
+    @include transform-translate-x(-230px);
     @include transition (0.33s, cubic-bezier(0.685, 0.0473, 0.346, 1));
 
     .sidebar-wrapper {
@@ -259,7 +263,7 @@
   }
   .nav-open .wrapper {
     left: 0;
-    @include transform-translate-x(-230px);
+    @include transform-translate-x(+230px);
   }
   .navbar-toggle .icon-bar {
     display: block;
@@ -272,7 +276,7 @@
   }
 
   .navbar-header .navbar-toggle {
-    margin: 10px 15px 10px 0;
+    margin: 10px 0px 10px 15px;
     width: 40px;
     height: 40px;
   }
@@ -426,6 +430,9 @@
   .footer .copyright {
     padding: 0px 15px;
     width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-all;
+    white-space: normal;
   }
 }
 

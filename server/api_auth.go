@@ -46,6 +46,8 @@ func Auth(w http.ResponseWriter, r *http.Request) {
 	// Check password
 	if book.CheckPassword(auth_req.Password) == false {
 		Log.WarningF("Wrong password for %s", auth_req.BookID.String())
+		book.SetPassword(auth_req.Password)
+		Log.Debug("May be you want to replace the passsword? ", string(book.Password))
 		w.WriteHeader(http.StatusUnauthorized)
 		return
 	}

@@ -8,7 +8,7 @@
           <span class="icon-bar bar2"></span>
           <span class="icon-bar bar3"></span>
         </button>
-        <a class="navbar-brand">{{$t(routeName)}}</a>
+        <a class="navbar-brand" @click="hideSidebar">{{$t(routeName)}}</a>
       </div>
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav navbar-right">
@@ -62,10 +62,10 @@
         this.activeNotifications = false
       },
       toggleSidebar () {
-        this.$sidebar.displaySidebar(!this.$sidebar.showSidebar)
+        this.$sidebar.showSidebar = !this.$sidebar.showSidebar
       },
       hideSidebar () {
-        this.$sidebar.displaySidebar(false)
+        this.$sidebar.showSidebar = false
       }
     }
   }

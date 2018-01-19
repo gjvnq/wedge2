@@ -2,7 +2,9 @@ package wedge
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/gjvnq/go.uuid"
@@ -27,6 +29,14 @@ type Account struct {
 
 func (acc Account) String() string {
 	return fmt.Sprintf("<%s %s %d>", acc.ID, acc.Name, len(acc.Children))
+}
+
+func (acc *Account) Validate() error {
+	acc.Name = strings.TrimSpace(acc.Name)
+	if len(acc.Name) == 0 {
+		return errors.New("account name must not be empty")
+	}
+	return nil
 }
 
 func AccountTree(input []Account) Account {
@@ -83,7 +93,11 @@ func (this AccountsDBConn) Set(account *Account) error {
 	if account.ID.IsNil() {
 		account.ID = uuid.NewV4()
 	}
-	_, err := DB.Exec("REPLACE INTO `accounts` VALUE (?, ?, ?, ?)",
+	err := account.Validate()
+	if err != nil {
+		return err
+	}
+	_, err = DB.Exec("REPLACE INTO `accounts` VALUE (?, ?, ?, ?)",
 		account.ID,
 		account.ParentID,
 		account.Name,

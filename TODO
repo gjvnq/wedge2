@@ -1,7 +1,7 @@
-[X] Edit a transaction
-[X] Delete a transaction
+[ ] Use cards for each account, displaying name and balance
+    [ ] Show both balance for the account itself AND balance including children accounts
 [ ] Edit an asset's value
-[ ] Delete an asset
+[ ] Edit an asset
 [ ] Automatically load asset value for currencies
 [ ] Automatically load asset value for B3
 [ ] Filter transactions by time period

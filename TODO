@@ -1,5 +1,5 @@
-[ ] Use cards for each account, displaying name and balance
-    [ ] Show both balance for the account itself AND balance including children accounts
+[X] Use cards for each account, displaying name and balance
+    [X] Show both balance for the account itself AND balance including children accounts
 [ ] Edit an asset's value
 [ ] Edit an asset
 [ ] Automatically load asset value for currencies

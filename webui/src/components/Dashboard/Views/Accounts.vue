@@ -1,84 +1,55 @@
 <template>
-  <div class="row">
-    <div class="col-md-12">
-      <div class="card">
-        <div class="header">
-          <h4 class="title">{{$t('Add Account')}}</h4>
-        </div>
-        <div class="content">
-          <form @submit.prevent>
-            <div class="row">
-              <div class="col-md-1"></div>
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>{{$t('Parent')}}</label>
-                  <select class="form-control border-input" v-model="newAccountParent">
-                    <option value="00000000-0000-0000-0000-000000000000">{{$t('No parent account')}}</option>
-                    <option v-for="account in accountsList" :value="account.id">{{account.name}}</option>
-                  </select>
+  <div>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="card">
+          <div class="header">
+            <h4 class="title">{{$t('Add Account')}}</h4>
+          </div>
+          <div class="content">
+            <form @submit.prevent>
+              <div class="row">
+                <div class="col-md-1"></div>
+                <div class="col-md-5">
+                  <div class="form-group">
+                    <label>{{$t('Parent account')}}</label>
+                    <select class="form-control border-input" v-model="newAccountParent">
+                      <option value="00000000-0000-0000-0000-000000000000">{{$t('No parent account')}}</option>
+                      <option v-for="account in accountsList" :value="account.id">{{account.name}}</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="col-md-5">
+                  <div class="form-group">
+                    <label>{{$t('Name')}}</label>
+                    <input type="text" class="form-control border-input" v-model="newAccountName">
+                  </div>
                 </div>
               </div>
-              <div class="col-md-5">
-                <div class="form-group">
-                  <label>{{$t('Name')}}</label>
-                  <input type="text" class="form-control border-input" v-model="newAccountName">
-                </div>
+              <div class="text-center">
+                <button class="btn btn-info btn-fill btn-wd" :disabled="newAccountBtn == false" @click="addAccount">{{$t('Add Account')}}</button>
               </div>
-            </div>
-            <div class="text-center">
-              <button class="btn btn-info btn-fill btn-wd" :disabled="newAccountBtn == false" @click="addAccount">{{$t('Add Account')}}</button>
-            </div>
-            <div class="clearfix">
-            </div>
-          </form>
+              <div class="clearfix">
+              </div>
+            </form>
+          </div>
         </div>
       </div>
     </div>
-    <div class="col-md-12">
-      <div class="card">
-        <div class="header">
-          <h4 class="title">{{$t('Accounts')}}</h4>
-        </div>
-        <p></p>
-        <tree-view :model="accountsTree" :formatter="tree_formatter" :html="true">
-        </tree-view>
-        <div class="header">
-        </div>
-      </div>
-    </div>
+    <account-tree-view :model="accountsTree" :level="0"></account-tree-view>
   </div>
 </template>
 <script>
-  import {_} from 'vue-underscore'
-  import TreeView from 'components/UIComponents/TreeView.vue'
+  import AccountTreeView from 'components/UIComponents/AccountTreeView.vue'
 
   export default {
     components: {
-      TreeView
+      AccountTreeView
     },
     beforeMount () {
       this.updateAccounts()
     },
     methods: {
-      tree_formatter (acc) {
-        if (acc.name === '') {
-          return ''
-        }
-        var balance = ''
-        for (var assetCode in acc.balance_codes) {
-          var num = acc.balance_codes[assetCode] / 1E8
-          if (num >= 0) {
-            num = '<span class="text-info">+' + num
-          } else {
-            num = '<span class="text-danger">' + num
-          }
-          balance += num + ' ' + _.escape(assetCode) + '</span>; '
-        }
-        if (balance !== '') {
-          balance = ' ‣ ' + balance
-        }
-        return '<span class="mono">' + _.escape(acc.name) + balance + '</span>'
-      },
       addAccount () {
         if (this.newAccountBtn === false) {
           return

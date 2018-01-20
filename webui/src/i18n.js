@@ -49,6 +49,9 @@ export const messages = {
     'Add Account': 'Adicionar Conta',
     'Failed to talk to server': 'Falha ao falar com o servidor',
     'Transaction edited': 'Transação editada',
-    'Loading transaction...': 'Carregando transação'
+    'Loading transaction...': 'Carregando transação',
+    'Parent account': 'Conta-pai',
+    'This account only:': 'Apenas essa conta:',
+    'Including children accounts:': 'Incluindo contas filhas:'
   }
 }

@@ -14,15 +14,15 @@ type AccountsDBConn struct{}
 var Accounts AccountsDBConn
 
 type Account struct {
-	ID           uuid.UUID           `json:"id" gorm:"primary_key"`
-	BookID       uuid.UUID           `json:"book_id"`
-	ParentID     uuid.UUID           `json:"parent_id"`
-	Name         string              `json:"name"`
-	BalanceIDs   map[uuid.UUID]int64 `json:"balance_ids"`
-	BalanceCodes map[string]int64    `json:"balance_codes"`
-	// Associations
-	Book     Book      `json:"book,omitempty"`
-	Children []Account `json:"children"`
+	ID                uuid.UUID           `json:"id" gorm:"primary_key"`
+	BookID            uuid.UUID           `json:"book_id"`
+	ParentID          uuid.UUID           `json:"parent_id"`
+	Name              string              `json:"name"`
+	LocalBalanceIDs   map[uuid.UUID]int64 `json:"local_balance_ids"`
+	LocalBalanceCodes map[string]int64    `json:"local_balance_codes"`
+	TotalBalanceIDs   map[uuid.UUID]int64 `json:"total_balance_ids,omitempty"`
+	TotalBalanceCodes map[string]int64    `json:"total_balance_codes,omitempty"`
+	Children          []Account           `json:"children"`
 }
 
 func (acc Account) String() string {
@@ -48,8 +48,8 @@ func (acc *Account) LoadBalanceAt(date LDate) error {
 		return err
 	}
 	defer rows.Close()
-	acc.BalanceIDs = make(map[uuid.UUID]int64)
-	acc.BalanceCodes = make(map[string]int64)
+	acc.LocalBalanceIDs = make(map[uuid.UUID]int64)
+	acc.LocalBalanceCodes = make(map[string]int64)
 	for rows.Next() {
 		var asset_id uuid.UUID
 		var asset_code string
@@ -64,8 +64,8 @@ func (acc *Account) LoadBalanceAt(date LDate) error {
 			continue
 		}
 
-		acc.BalanceIDs[asset_id] = amount
-		acc.BalanceCodes[asset_code] = amount
+		acc.LocalBalanceIDs[asset_id] = amount
+		acc.LocalBalanceCodes[asset_code] = amount
 	}
 
 	return nil
@@ -77,6 +77,7 @@ func AccountTree(input []Account) Account {
 	mask := make(map[uuid.UUID]bool)
 	// Make the tree
 	account_tree_body(&root, input, mask)
+	account_tree_sum(&root)
 	return root
 }
 
@@ -91,6 +92,31 @@ func account_tree_body(root *Account, input []Account, mask map[uuid.UUID]bool) 
 			root.Children = append(root.Children, account)
 		}
 	}
+}
+
+func account_tree_sum(root *Account) {
+	// Copy stuff
+	root.TotalBalanceIDs = make(map[uuid.UUID]int64)
+	root.TotalBalanceCodes = make(map[string]int64)
+	for id, val := range root.LocalBalanceIDs {
+		root.TotalBalanceIDs[id] += val
+	}
+	for id, val := range root.LocalBalanceCodes {
+		root.TotalBalanceCodes[id] += val
+	}
+
+	// Sum stuff
+	for i := range root.Children {
+		acc := &root.Children[i]
+		account_tree_sum(acc)
+		for id, val := range acc.TotalBalanceIDs {
+			root.TotalBalanceIDs[id] += val
+		}
+		for code, val := range acc.TotalBalanceCodes {
+			root.TotalBalanceCodes[code] += val
+		}
+	}
+	Log.Debug(root.Name, root.TotalBalanceCodes)
 }
 
 func (this AccountsDBConn) InBook(book_id uuid.UUID) ([]Account, error) {

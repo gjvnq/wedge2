@@ -68,11 +68,11 @@
         for (var assetCode in acc.balance_codes) {
           var num = acc.balance_codes[assetCode] / 1E8
           if (num >= 0) {
-            num = '<span class="text-info">' + num
+            num = '<span class="text-info">+' + num
           } else {
             num = '<span class="text-danger">' + num
           }
-          balance += num + ' ' + _.escape(assetCode) + '</span> '
+          balance += num + ' ' + _.escape(assetCode) + '</span>; '
         }
         if (balance !== '') {
           balance = ' ‣ ' + balance

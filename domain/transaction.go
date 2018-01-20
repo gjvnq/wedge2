@@ -36,7 +36,7 @@ func (tr *Transaction) ComputeTotals() {
 
 func (this TransactionsDBConn) InBook(book_id uuid.UUID) ([]Transaction, error) {
 	transactions := make([]Transaction, 0)
-	rows, err := DB.Query("SELECT `ID`, `Name`, `LocalDate`, `BookID` FROM `transactions` WHERE `BookID` = ? ORDER BY `LocalDate`, `Name`", book_id)
+	rows, err := DB.Query("SELECT `ID`, `Name`, `LocalDate`, `BookID` FROM `transactions` WHERE `BookID` = ? ORDER BY `LocalDate` DESC, `Name` ASC", book_id)
 	if err == sql.ErrNoRows {
 		return nil, err
 	}

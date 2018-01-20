@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const DAY_ANY = 0
@@ -107,6 +108,19 @@ func (ld LDate) is_valid() bool {
 
 func (ld LDate) String() string {
 	return fmt.Sprintf("%04d-%02d-%02d", ld.year, ld.month, ld.day)
+}
+
+func (ld *LDate) Set(y, m, d int) {
+	ld.year = y
+	ld.month = m
+	ld.day = d
+}
+
+func LDateNow() LDate {
+	ld := LDate{}
+	t := time.Now()
+	ld.Set(t.Year(), int(t.Month()), t.Day())
+	return ld
 }
 
 func Limit99(v int) int {

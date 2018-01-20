@@ -13,14 +13,29 @@ func AccountList(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// List Accounts
-	accounts, err := wedge.Accounts.InBook(GetBookId(r))
-	if err != nil {
-		SendErrCodeAndLog(w, 500, err)
+	GetAccountsCore(wedge.LDateNow(), false, w, r)
+}
+
+func AccountBalances(w http.ResponseWriter, r *http.Request) {
+	var err error
+	var time wedge.LDate
+
+	// Check auth
+	if IsAuthInvalid(w, r) {
 		return
 	}
 
-	sendJSONResponse(w, accounts)
+	// Parse date
+	if GetString("time", r) == "now-utc" {
+		time = wedge.LDateNow()
+	} else {
+		time, err = GetLDate("time", r, w)
+		if err != nil {
+			return
+		}
+	}
+
+	GetAccountsCore(time, false, w, r)
 }
 
 func AccountTree(w http.ResponseWriter, r *http.Request) {
@@ -29,14 +44,29 @@ func AccountTree(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	GetAccountsCore(wedge.LDateNow(), true, w, r)
+}
+
+func GetAccountsCore(time wedge.LDate, tree bool, w http.ResponseWriter, r *http.Request) {
 	// List Accounts
 	accounts, err := wedge.Accounts.InBook(GetBookId(r))
 	if err != nil {
 		SendErrCodeAndLog(w, 500, err)
 		return
 	}
+	for i := 0; i < len(accounts); i++ {
+		err = accounts[i].LoadBalanceAt(time)
+		if err != nil {
+			SendErrCodeAndLog(w, 500, err)
+			return
+		}
+	}
 
-	sendJSONResponse(w, wedge.AccountTree(accounts))
+	if tree {
+		sendJSONResponse(w, wedge.AccountTree(accounts))
+	} else {
+		sendJSONResponse(w, accounts)
+	}
 }
 
 func AccountSet(w http.ResponseWriter, r *http.Request) {

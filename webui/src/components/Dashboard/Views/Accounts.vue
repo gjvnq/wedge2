@@ -40,7 +40,7 @@
           <h4 class="title">{{$t('Accounts')}}</h4>
         </div>
         <p></p>
-        <tree-view :model="accountsTree">
+        <tree-view :model="accountsTree" :formatter="tree_formatter" :html="true">
         </tree-view>
         <div class="header">
         </div>
@@ -49,6 +49,7 @@
   </div>
 </template>
 <script>
+  import {_} from 'vue-underscore'
   import TreeView from 'components/UIComponents/TreeView.vue'
 
   export default {
@@ -59,6 +60,25 @@
       this.updateAccounts()
     },
     methods: {
+      tree_formatter (acc) {
+        if (acc.name === '') {
+          return ''
+        }
+        var balance = ''
+        for (var assetCode in acc.balance_codes) {
+          var num = acc.balance_codes[assetCode] / 1E8
+          if (num >= 0) {
+            num = '<span class="text-info">' + num
+          } else {
+            num = '<span class="text-danger">' + num
+          }
+          balance += num + ' ' + _.escape(assetCode) + '</span> '
+        }
+        if (balance !== '') {
+          balance = ' ‣ ' + balance
+        }
+        return '<span class="mono">' + _.escape(acc.name) + balance + '</span>'
+      },
       addAccount () {
         if (this.newAccountBtn === false) {
           return

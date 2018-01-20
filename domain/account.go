@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-	"time"
 
 	"github.com/gjvnq/go.uuid"
 )
@@ -15,13 +14,12 @@ type AccountsDBConn struct{}
 var Accounts AccountsDBConn
 
 type Account struct {
-	ID       uuid.UUID `json:"id" gorm:"primary_key"`
-	BookID   uuid.UUID `json:"book_id"`
-	ParentID uuid.UUID `json:"parent_id"`
-	Name     string    `json:"name"`
-	// Date Stuff
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID           uuid.UUID           `json:"id" gorm:"primary_key"`
+	BookID       uuid.UUID           `json:"book_id"`
+	ParentID     uuid.UUID           `json:"parent_id"`
+	Name         string              `json:"name"`
+	BalanceIDs   map[uuid.UUID]int64 `json:"balance_ids"`
+	BalanceCodes map[string]int64    `json:"balance_codes"`
 	// Associations
 	Book     Book      `json:"book,omitempty"`
 	Children []Account `json:"children"`
@@ -36,6 +34,40 @@ func (acc *Account) Validate() error {
 	if len(acc.Name) == 0 {
 		return errors.New("account name must not be empty")
 	}
+	return nil
+}
+
+func (acc *Account) LoadBalanceAt(date LDate) error {
+	rows, err := DB.Query("SELECT `AssetID`, `AssetCode`, SUM(`Amount`) FROM `movements_view` WHERE `AccountID` = ? AND `LocalDate` <= ? AND `Status` != 'C' GROUP BY `AccountID`, `AssetID`", acc.ID, date)
+
+	if err == sql.ErrNoRows {
+		return err
+	}
+	if err != nil {
+		Log.WarningF("Error when loading balance: %#v", err)
+		return err
+	}
+	defer rows.Close()
+	acc.BalanceIDs = make(map[uuid.UUID]int64)
+	acc.BalanceCodes = make(map[string]int64)
+	for rows.Next() {
+		var asset_id uuid.UUID
+		var asset_code string
+		var amount int64
+		err = rows.Scan(&asset_id, &asset_code, &amount)
+		if err != nil {
+			Log.WarningF("Error when loading balance for account %s: %#v", acc.ID.String(), err)
+			return err
+		}
+		// Do not include zeros
+		if amount == 0 {
+			continue
+		}
+
+		acc.BalanceIDs[asset_id] = amount
+		acc.BalanceCodes[asset_code] = amount
+	}
+
 	return nil
 }
 

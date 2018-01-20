@@ -50,6 +50,7 @@ func main() {
 	router.HandleFunc("/books/{book-id}/assets", AssetsList).Methods("GET")
 	router.HandleFunc("/books/{book-id}/assets", AssetsPut).Methods("PUT")
 	router.HandleFunc("/books/{book-id}/accounts", AccountList).Methods("GET")
+	router.HandleFunc("/books/{book-id}/accounts/balances/at/{time}", AccountBalances).Methods("GET")
 	router.HandleFunc("/books/{book-id}/accounts-tree", AccountTree).Methods("GET")
 	router.HandleFunc("/books/{book-id}/accounts", AccountSet).Methods("PUT")
 	router.HandleFunc("/books/{book-id}/transactions", TransactionSet).Methods("PUT")
@@ -117,6 +118,21 @@ func GetBookId(r *http.Request) uuid.UUID {
 func GetUUID(key string, r *http.Request) uuid.UUID {
 	vars := mux.Vars(r)
 	return uuid.FromStringOrNil(vars[key])
+}
+
+func GetString(key string, r *http.Request) string {
+	vars := mux.Vars(r)
+	return vars[key]
+}
+
+func GetLDate(key string, r *http.Request, w http.ResponseWriter) (ldate wedge.LDate, err error) {
+	vars := mux.Vars(r)
+	err = ldate.UnmarshalJSON([]byte(vars[key]))
+	if err != nil {
+		SendErrCodeAndLog(w, 500, err)
+		return ldate, err
+	}
+	return ldate, nil
 }
 
 func SendErrCode(w http.ResponseWriter, code int) {

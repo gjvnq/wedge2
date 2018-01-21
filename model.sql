@@ -157,10 +157,24 @@ CREATE TABLE `transactions` (
 --
 DROP TABLE IF EXISTS `movements_view`;
 
-CREATE VIEW `movements_view`  AS  select `movements`.`ID` AS `MovementID`,`movements`.`TransactionID` AS `TransactionID`,`movements`.`AccountID` AS 
-`AccountID`,`accounts`.`ParentID` AS `AccountParentID`,`accounts`.`BookID` AS `AccountBookID`,`movements`.`LocalDate` AS `LocalDate`,`movements`.`Status` AS 
-`Status`,`accounts`.`Name` AS `AccountName`,`movements`.`AssetID` AS `AssetID`,`assets`.`Code` AS `AssetCode`,`movements`.`Amount` AS `Amount` from ((`movements` join 
-`accounts` on((`movements`.`AccountID` = `accounts`.`ID`))) join `assets` on((`movements`.`AssetID` = `assets`.`ID`))) ;
+CREATE OR REPLACE VIEW `movements_view`  AS SELECT
+  `movements`.`TransactionID` AS `TransactionID`,
+  `transactions`.`Name` AS `TransactionName`,
+  `transactions`.`LocalDate` AS `TransactionDate`,
+  `accounts`.`ParentID` AS `AccountParentID`,
+  `accounts`.`BookID` AS `AccountBookID`,
+  `movements`.`ID` AS `MovementID`,
+  `movements`.`LocalDate` AS `MovementDate`,
+  `movements`.`Status` AS `MovementStatus`,
+  `movements`.`AccountID` AS `AccountID`,
+  `accounts`.`Name` AS `AccountName`,
+  `movements`.`Amount` AS `Amount`,
+  `assets`.`Code` AS `AssetCode`,
+  `movements`.`AssetID` AS `AssetID`
+  FROM ((
+    (`movements` JOIN `accounts` ON((`movements`.`AccountID` = `accounts`.`ID`)))
+    JOIN `assets` ON((`movements`.`AssetID` = `assets`.`ID`)))
+    JOIN `transactions` ON((`movements`.`TransactionID` = `transactions`.`ID`)))
 
 --
 -- Indexes for dumped tables

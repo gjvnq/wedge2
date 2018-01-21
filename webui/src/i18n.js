@@ -52,6 +52,8 @@ export const messages = {
     'Loading transaction...': 'Carregando transação',
     'Parent account': 'Conta-pai',
     'This account only:': 'Apenas essa conta:',
-    'Including children accounts:': 'Incluindo contas filhas:'
+    'Including children accounts:': 'Incluindo contas filhas:',
+    'See movements': 'Ver movimentações',
+    'Account Movements': 'Movimentações da Conta'
   }
 }

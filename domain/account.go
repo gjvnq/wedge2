@@ -81,6 +81,17 @@ func AccountTree(input []Account) Account {
 	return root
 }
 
+func AccountList(root Account) []Account {
+	ans := make([]Account, 1)
+	ans[0] = root
+	for _, child := range root.Children {
+		buf := AccountList(child)
+		ans = append(ans, buf...)
+	}
+	ans[0].Children = nil
+	return ans
+}
+
 func account_tree_body(root *Account, input []Account, mask map[uuid.UUID]bool) {
 	root.Children = make([]Account, 0)
 	mask[root.ID] = true

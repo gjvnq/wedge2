@@ -12,6 +12,7 @@ export default new Vuex.Store({
     assetsByID: {},
     assetsLoading: false,
     accounts: [],
+    accountsMap: {},
     accountsTree: {},
     accountsLoading: false
   },
@@ -29,6 +30,11 @@ export default new Vuex.Store({
     },
     setAccounts (state, newAccounts) {
       state.accounts = newAccounts
+      state.accountsMap = {}
+      for (var i = 0; i < newAccounts.length; i++) {
+        var account = newAccounts[i]
+        state.accountsMap[account.id] = account
+      }
     },
     setAccountsTree (state, newAccountsTree) {
       state.accountsTree = newAccountsTree

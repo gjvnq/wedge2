@@ -47,7 +47,7 @@ func AccountTree(w http.ResponseWriter, r *http.Request) {
 	GetAccountsCore(wedge.LDateNow(), true, w, r)
 }
 
-func GetAccountsCore(time wedge.LDate, tree bool, w http.ResponseWriter, r *http.Request) {
+func GetAccountsCore(time wedge.LDate, tree_flag bool, w http.ResponseWriter, r *http.Request) {
 	// List Accounts
 	accounts, err := wedge.Accounts.InBook(GetBookId(r))
 	if err != nil {
@@ -62,10 +62,12 @@ func GetAccountsCore(time wedge.LDate, tree bool, w http.ResponseWriter, r *http
 		}
 	}
 
-	if tree {
-		sendJSONResponse(w, wedge.AccountTree(accounts))
+	tree := wedge.AccountTree(accounts)
+
+	if tree_flag {
+		sendJSONResponse(w, tree)
 	} else {
-		sendJSONResponse(w, accounts)
+		sendJSONResponse(w, wedge.AccountList(tree))
 	}
 }
 

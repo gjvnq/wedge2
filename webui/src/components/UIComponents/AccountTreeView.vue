@@ -6,11 +6,12 @@
       <div :class="size_class()">
         <div class="card">
           <div class="header">
-            <h4 class="title">{{ get_name(model) }}</h4>
+            <h4 class="title">{{ get_name(model) }}
+              <router-link v-if="model.id !== '00000000-0000-0000-0000-000000000000' && !singleCard" :to="'/book/accounts/'+model.id">({{$t('See movements')}})</router-link></h4>
           </div>
           <div class="content">
             <p v-html="local_totals(model)"></p>
-            <p v-if="isFolder" v-html="sum_totals(model)"></p>
+            <p v-if="isFolder || singleCard" v-html="sum_totals(model)"></p>
           </div>
         </div>
       </div>
@@ -31,7 +32,8 @@
     name: 'account-tree-view',
     props: {
       level: Number,
-      model: Object
+      model: Object,
+      singleCard: Boolean
     },
     data: function () {
       return {}
@@ -57,7 +59,7 @@
         for (var assetCode in acc.local_balance_codes) {
           var num = acc.local_balance_codes[assetCode] / 1E8
           if (num >= 0) {
-            num = '<span class="text-info nowrap">+' + num
+            num = '<span class="text-success nowrap">+' + num
           } else {
             num = '<span class="text-danger nowrap">' + num
           }
@@ -74,7 +76,7 @@
         for (var assetCode in acc.total_balance_codes) {
           var num = acc.total_balance_codes[assetCode] / 1E8
           if (num >= 0) {
-            num = '<span class="text-info nowrap">+' + num
+            num = '<span class="text-success nowrap">+' + num
           } else {
             num = '<span class="text-danger nowrap">' + num
           }

@@ -38,7 +38,7 @@ func (acc *Account) Validate() error {
 }
 
 func (acc *Account) LoadBalanceAt(date LDate) error {
-	rows, err := DB.Query("SELECT `AssetID`, `AssetCode`, SUM(`Amount`) FROM `movements_view` WHERE `AccountID` = ? AND `LocalDate` <= ? AND `Status` != 'C' GROUP BY `AccountID`, `AssetID`", acc.ID, date)
+	rows, err := DB.Query("SELECT `AssetID`, `AssetCode`, SUM(`Amount`) FROM `movements_view` WHERE `AccountID` = ? AND `MovementDate` <= ? AND `MovementStatus` != 'C' GROUP BY `AccountID`, `AssetID`", acc.ID, date)
 
 	if err == sql.ErrNoRows {
 		return err
@@ -127,7 +127,6 @@ func account_tree_sum(root *Account) {
 			root.TotalBalanceCodes[code] += val
 		}
 	}
-	Log.Debug(root.Name, root.TotalBalanceCodes)
 }
 
 func (this AccountsDBConn) InBook(book_id uuid.UUID) ([]Account, error) {

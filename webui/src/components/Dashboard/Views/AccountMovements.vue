@@ -16,9 +16,9 @@
 <script>
   import AccountTreeView from 'components/UIComponents/AccountTreeView.vue'
   import PaperTable from 'components/UIComponents/PaperTable.vue'
-  const tableColumns = ['Transaction Name', 'Transaction Date', 'Movement Amount', 'Movement Date', 'Movement Status']
+  const tableColumns = ['Transaction Name', 'Transaction Date', 'Amount', 'Movement Date', 'Movement Status']
   const tableColumnsStyle = ['', '', 'mono', '', '']
-  const tableColumnsProperties = ['name', 'local_date', 'total']
+  const tableColumnsProperties = ['transaction_name', 'transaction_date', 'amount_human', 'local_date', 'status_text']
 
   export default {
     components: {
@@ -38,6 +38,24 @@
         this.id = id
         this.$store.dispatch('updateAssets')
         this.$store.dispatch('updateAccounts')
+        this.load()
+      },
+      load () {
+        this.$http.get('books/{book-id}/accounts/' + this.id + '/movements').then(response => { // Success
+          this.movements = response.body
+          // Make data more presentable
+          var statusFixer = {
+            'C': this.$t('Cancelled'),
+            'D': this.$t('Done'),
+            'P': this.$t('Planned')
+          }
+          for (var i = 0; i < this.movements.length; i++) {
+            this.movements[i].status_text = statusFixer[this.movements[i].status]
+            this.movements[i].amount_human = this.movements[i].amount / 1E8 + ' ' + this.movements[i].asset_code
+          }
+        }, response => { // Error
+          console.log('ERR', response)
+        })
       }
     },
     computed: {
@@ -55,12 +73,12 @@
         newAccountParent: '00000000-0000-0000-0000-000000000000',
         newAccountBtn: true,
         id: {},
+        movements: [],
         tblColumns: [...tableColumns],
         tblStyles: [...tableColumnsStyle],
         tblColumnProperties: [...tableColumnsProperties],
         tblClickCallback: function (el) {
-          console.log(el.id)
-          this.$router.push('transactions/' + el.id)
+          this.$router.push('../transactions/' + el.transaction_id)
         }
       }
     }

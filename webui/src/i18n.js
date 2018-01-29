@@ -24,6 +24,7 @@ export const messages = {
     Save: 'Salvar',
     Quantity: 'Quantidade',
     Status: 'Status',
+    Amount: 'Quantidade',
     'Shouldn\'t the sum be zero?': 'A soma não deveria ser zero?',
     'Successfully added transaction': 'Transação adicionada com sucesso',
     'New Transaction': 'Nova Transação',
@@ -54,6 +55,10 @@ export const messages = {
     'This account only:': 'Apenas essa conta:',
     'Including children accounts:': 'Incluindo contas filhas:',
     'See movements': 'Ver movimentações',
-    'Account Movements': 'Movimentações da Conta'
+    'Account Movements': 'Movimentações da Conta',
+    'Transaction Name': 'Nome da Transação',
+    'Transaction Date': 'Data da Transação',
+    'Movement Date': 'Data da Movimentação',
+    'Movement Status': 'Status da Movimentação'
   }
 }

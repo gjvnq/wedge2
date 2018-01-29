@@ -53,6 +53,7 @@ func main() {
 	router.HandleFunc("/books/{book-id}/accounts/balances/at/{time}", AccountBalances).Methods("GET")
 	router.HandleFunc("/books/{book-id}/accounts-tree", AccountTree).Methods("GET")
 	router.HandleFunc("/books/{book-id}/accounts", AccountSet).Methods("PUT")
+	router.HandleFunc("/books/{book-id}/accounts/{acc-id}/movements", MovementsAccountGet).Methods("GET")
 	router.HandleFunc("/books/{book-id}/transactions", TransactionSet).Methods("PUT")
 	router.HandleFunc("/books/{book-id}/transactions", TransactionList).Methods("GET")
 	router.HandleFunc("/books/{book-id}/transactions/{tr-id}", TransactionGet).Methods("GET")

@@ -25,13 +25,12 @@ type MovementExtended struct {
 	Movement
 	TransactionName string `json:"transaction_name"`
 	TransactionDate LDate  `json:"transaction_date"`
-	AccountName     string `json:"account_name"`
-	AssetName       string `json:"asset_name"`
+	AssetCode       string `json:"asset_code"`
 }
 
-func (this MovementsDBConn) InAccount(acc_id uuid.UUID) ([]MovementExtended, error) {
+func (this MovementsDBConn) InAccountAndBook(acc_id, book_id uuid.UUID) ([]MovementExtended, error) {
 	movements := make([]MovementExtended, 0)
-	rows, err := DB.Query("SELECT `MovementID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `MovementStatus`, `MovementDate`, `TransactionName`, `TransactionDate`, `AccountName`, `AssetName` FROM `movements_view` WHERE `AccountID` = ? ORDER BY `MovementDate` DESC, `TransactionName` ASC", acc_id)
+	rows, err := DB.Query("SELECT `MovementID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `MovementStatus`, `MovementDate`, `TransactionName`, `TransactionDate`, `AssetCode` FROM `movements_view` WHERE `AccountID` = ? AND `AccountBookID` = ? ORDER BY `MovementDate` DESC, `TransactionName` ASC", acc_id, book_id)
 	if err == sql.ErrNoRows {
 		return nil, err
 	}
@@ -52,8 +51,8 @@ func (this MovementsDBConn) InAccount(acc_id uuid.UUID) ([]MovementExtended, err
 			&movement.Status,
 			&movement.LocalDate,
 			&movement.TransactionName,
-			&movement.AccountName,
-			&movement.AssetName)
+			&movement.TransactionDate,
+			&movement.AssetCode)
 		if err != nil {
 			Log.WarningF("Error when loading movement %s: %#v", movement.ID.String(), err)
 			return nil, err

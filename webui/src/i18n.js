@@ -59,6 +59,7 @@ export const messages = {
     'Transaction Name': 'Nome da Transação',
     'Transaction Date': 'Data da Transação',
     'Movement Date': 'Data da Movimentação',
-    'Movement Status': 'Status da Movimentação'
+    'Movement Status': 'Status da Movimentação',
+    'Tip: use Ctrl+Alt+C while on the date field to copy its value to all movements.': 'Dica: use Ctrl+Alt+C enquanto no campo de data para copiá-la para todas movimentações.'
   }
 }

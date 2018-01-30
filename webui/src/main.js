@@ -3,6 +3,7 @@ import Vuex from 'vuex'
 import VueI18n from 'vue-i18n'
 import VueRouter from 'vue-router'
 import VueResource from 'vue-resource'
+import VueShortkey from 'vue-shortkey'
 
 // Plugins
 import storePlugin from './storePlugin'
@@ -27,6 +28,7 @@ import {messages} from './i18n.js'
 // plugin setup
 Vue.use(Vuex)
 Vue.use(storePlugin)
+Vue.use(VueShortkey)
 Vue.use(VueI18n)
 Vue.use(VueRouter)
 Vue.use(VueResource)

@@ -49,33 +49,17 @@
         default: false
       },
       value: {
-        account_id: {
-          type: String,
-          default: ''
-        },
-        amount: {
-          type: Number,
-          default: 0
-        },
-        amount_user: {
-          type: Number,
-          default: 0
-        },
-        asset_id: {
-          type: String,
-          default: ''
-        },
-        local_date: {
-          type: Date,
-          default: new Date()
-        },
-        status: {
-          type: String,
-          default: ''
-        },
-        valid: {
-          type: Boolean,
-          default: false
+        type: Object,
+        default: function () {
+          return {
+            account_id: '',
+            amount: 0,
+            amount_user: 0,
+            asset_id: '',
+            local_date: new Date(),
+            status: '',
+            valid: false
+          }
         }
       }
     },

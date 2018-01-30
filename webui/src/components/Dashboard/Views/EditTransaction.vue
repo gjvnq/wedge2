@@ -13,7 +13,7 @@
             <div class="col-md-3" :class="{ 'has-error': dateErr }">
               <div class="form-group">
                 <label>{{$t('Date')}}</label>
-                <input type="date" class="form-control border-input" v-model="value.local_date" :disabled="saving || all_disabled" @input="validateBasic">
+                <input type="date" class="form-control border-input" v-model="value.local_date" :disabled="saving || all_disabled" @input="validateBasic" v-shortkey="['ctrl', 'alt', 'c']" @shortkey="setMovDates">
               </div>
             </div>
             <div class="col-md-1">
@@ -27,6 +27,11 @@
                 <div style="height: 27px"></div>
                 <button class="btn btn-info btn-fill btn-wd" :disabled="saving || all_disabled" @click="save">{{$t('Save')}}</button>
               </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-md-12 text-center">
+              <p>{{ $t('Tip: use Ctrl+Alt+C while on the date field to copy its value to all movements.') }}</p>
             </div>
           </div>
           <div class="text-center">
@@ -203,7 +208,16 @@
         })
       },
       addMovement () {
-        this.value.movements.push({})
+        var newMov = {}
+        var len = this.value.movements.length
+        if (len > 0) {
+          var oldMov = this.value.movements[len - 1]
+          newMov.asset_id = oldMov.asset_id
+          newMov.account_id = oldMov.account_id
+          newMov.status = oldMov.status
+          newMov.local_date = oldMov.local_date
+        }
+        this.value.movements.push(newMov)
       },
       addItem () {
         this.value.items.push({asset: this.default_asset})
@@ -274,6 +288,11 @@
         this.flagOk = false
       },
       updateTransactions () {
+      },
+      setMovDates () {
+        for (var i = 0; i < this.value.movements.length; i++) {
+          this.$set(this.value.movements[i], 'local_date', this.value.local_date)
+        }
       }
     },
     computed: {

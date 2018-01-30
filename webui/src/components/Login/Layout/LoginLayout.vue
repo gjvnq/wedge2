@@ -27,7 +27,7 @@
                 <div class="form-group">
                   <p id="msgErrPass" class="label label-warning" :class="{ hide: flagHideErrPass }" v-t="'Wrong password :-('"></p>
                 </div>
-                <button id="btnLogin" type="submit" class="btn btn-default" :disabled="flagBtn == false" v-on:click="login" v-t="'Login'"></button>
+                <button id="btnLogin" type="button" class="btn btn-default" :disabled="flagBtn == false" @click="login" v-t="'Login'"></button>
               </form>
             </div>
           </div>
@@ -61,7 +61,7 @@
           Vue.http.headers.common['Authorization'] = 'Bearer ' + response.bodyText
           localStorage.setItem('Authorization', response.bodyText)
           localStorage.setItem('BookId', fd['book_id'])
-          this.$router.push('book')
+          this.$router.push('/book')
         }, response => { // Error
           console.log('err', response)
           this.flagBtn = true

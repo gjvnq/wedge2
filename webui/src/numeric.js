@@ -1,7 +1,7 @@
 export default {
   parse (val) {
-    var re = /^([0-9']*)(?:|(?:.|,)([0-9]*))$/
-    var match = val.match(re)
+    var re = /^([-0-9']*)(?:|(?:.|,)([0-9]*))$/
+    var match = val.toString().match(re)
     if (match === null) {
       return 0 / 0
     }
@@ -21,7 +21,8 @@ export default {
     // Exclude zeros if necessary
     decPart = decPart.substr(0, 8)
     // Convert to the integer form
-    return Number(intPart + decPart)
+    var final = Number(intPart + decPart)
+    return final
   },
   format (int) {
     var str = int.toString()

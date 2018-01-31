@@ -32,6 +32,7 @@
 <script>
   import selector from 'components/UIComponents/Inputs/selector.vue'
   import assetSelector from 'components/UIComponents/Inputs/assetSelector.vue'
+  import numeric from '@/numeric.js'
 
   export default {
     components: {
@@ -65,12 +66,12 @@
     },
     beforeMount () {
       if (this.value.amount !== undefined && this.value.amount !== 0) {
-        this.amount_user = this.value.amount / 1E8
+        this.amount_user = numeric.format(this.value.amount)
       }
     },
     methods: {
       onChange (e) {
-        this.value.amount = Math.floor(this.amount_user * 1E8)
+        this.value.amount = numeric.parse(this.amount_user)
         this.$emit('change', this.value)
         if (this.validate_on_change) {
           this.validate()

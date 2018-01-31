@@ -27,6 +27,7 @@
 </template>
 <script>
   import {_} from 'vue-underscore'
+  import numeric from '@/numeric.js'
 
   export default {
     name: 'account-tree-view',
@@ -55,26 +56,15 @@
         if (acc.name === '') {
           return ''
         }
-        var balance = ''
-        for (var assetCode in acc.local_balance_codes) {
-          var num = acc.local_balance_codes[assetCode] / 1E8
-          if (num >= 0) {
-            num = '<span class="text-success nowrap">+' + num
-          } else {
-            num = '<span class="text-danger nowrap">' + num
-          }
-          if (balance === '') {
-            balance += num + ' ' + _.escape(assetCode) + '</span>'
-          } else {
-            balance += ' • ' + num + ' ' + _.escape(assetCode) + '</span>'
-          }
-        }
-        return this.$t('This account only:') + ' ' + balance
+        return this.$t('This account only:') + ' ' + this.generic_totals(acc, 'local_balance_codes')
       },
       sum_totals (acc) {
+        return this.$t('Including children accounts:') + ' ' + this.generic_totals(acc, 'total_balance_codes')
+      },
+      generic_totals (acc, key) {
         var balance = ''
-        for (var assetCode in acc.total_balance_codes) {
-          var num = acc.total_balance_codes[assetCode] / 1E8
+        for (var assetCode in acc[key]) {
+          var num = numeric.format(acc[key][assetCode])
           if (num >= 0) {
             num = '<span class="text-success nowrap">+' + num
           } else {
@@ -86,7 +76,7 @@
             balance += ' • ' + num + ' ' + _.escape(assetCode) + '</span>'
           }
         }
-        return this.$t('Including children accounts:') + ' ' + balance
+        return balance
       }
     },
     computed: {

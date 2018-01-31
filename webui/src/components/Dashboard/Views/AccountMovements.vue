@@ -16,6 +16,8 @@
 <script>
   import AccountTreeView from 'components/UIComponents/AccountTreeView.vue'
   import PaperTable from 'components/UIComponents/PaperTable.vue'
+  import numeric from '@/numeric.js'
+
   const tableColumns = ['Transaction Name', 'Transaction Date', 'Amount', 'Movement Date', 'Movement Status']
   const tableColumnsStyle = ['', '', 'mono', '', '']
   const tableColumnsProperties = ['transaction_name', 'transaction_date', 'amount_human', 'local_date', 'status_text']
@@ -51,7 +53,7 @@
           }
           for (var i = 0; i < this.movements.length; i++) {
             this.movements[i].status_text = statusFixer[this.movements[i].status]
-            this.movements[i].amount_human = this.movements[i].amount / 1E8 + ' ' + this.movements[i].asset_code
+            this.movements[i].amount_human = numeric.format(this.movements[i].amount) + '\u00A0' + this.movements[i].asset_code
           }
         }, response => { // Error
           console.log('ERR', response)

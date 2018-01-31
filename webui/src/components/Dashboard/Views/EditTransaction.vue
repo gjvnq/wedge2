@@ -272,6 +272,9 @@
           this.saving = false
           this.notifyVue('success', 'ti-save', 'Transaction edited')
           this.updateTransactions()
+          if (this.value.id === undefined) {
+            this.value.name = ''
+          }
         }, response => { // Error
           console.log('err', response)
           this.saving = false

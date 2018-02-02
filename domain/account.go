@@ -54,12 +54,6 @@ func (br *BalanceRecord) Yesterday(yesterday_ids map[uuid.UUID]int64, yesterday_
 }
 
 func (br *BalanceRecord) Add(id uuid.UUID, code string, amount int64) {
-	// if _, ok := br.DeltaByIDs[id]; !ok {
-	// 	br.DeltaByIDs[id] = 0
-	// }
-	// if _, ok := br.DeltaByCodes[id]; !ok {
-	// 	br.DeltaByCodes[id] = 0
-	// }
 	br.DeltaByIDs[id] += amount
 	br.DeltaByCodes[code] += amount
 	br.TotalByIDs[id] += amount

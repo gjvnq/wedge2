@@ -110,6 +110,10 @@ func (ld LDate) String() string {
 	return fmt.Sprintf("%04d-%02d-%02d", ld.year, ld.month, ld.day)
 }
 
+func (ld1 LDate) Equals(ld2 LDate) bool {
+	return ld1.String() == ld2.String()
+}
+
 func (ld *LDate) Set(y, m, d int) {
 	ld.year = y
 	ld.month = m

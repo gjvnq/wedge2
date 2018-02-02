@@ -53,6 +53,7 @@ func main() {
 	router.HandleFunc("/books/{book-id}/accounts/balances/at/{time}", AccountBalances).Methods("GET")
 	router.HandleFunc("/books/{book-id}/accounts-tree", AccountTree).Methods("GET")
 	router.HandleFunc("/books/{book-id}/accounts", AccountSet).Methods("PUT")
+	router.HandleFunc("/books/{book-id}/accounts/{acc-id}/balance/{from}/{to}", AccountBalanceHistoric).Methods("GET")
 	router.HandleFunc("/books/{book-id}/accounts/{acc-id}/movements", MovementsAccountGet).Methods("GET")
 	router.HandleFunc("/books/{book-id}/transactions", TransactionSet).Methods("PUT")
 	router.HandleFunc("/books/{book-id}/transactions", TransactionList).Methods("GET")
@@ -126,14 +127,14 @@ func GetString(key string, r *http.Request) string {
 	return vars[key]
 }
 
-func GetLDate(key string, r *http.Request, w http.ResponseWriter) (ldate wedge.LDate, err error) {
+func GetLDate(key string, r *http.Request) wedge.LDate {
+	ldate := wedge.LDate{}
 	vars := mux.Vars(r)
-	err = ldate.UnmarshalJSON([]byte(vars[key]))
+	err := ldate.UnmarshalJSON([]byte(vars[key]))
 	if err != nil {
-		SendErrCodeAndLog(w, 500, err)
-		return ldate, err
+		return wedge.LDate{}
 	}
-	return ldate, nil
+	return ldate
 }
 
 func SendErrCode(w http.ResponseWriter, code int) {

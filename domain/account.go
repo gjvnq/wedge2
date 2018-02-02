@@ -22,7 +22,48 @@ type Account struct {
 	LocalBalanceCodes map[string]int64    `json:"local_balance_codes"`
 	TotalBalanceIDs   map[uuid.UUID]int64 `json:"total_balance_ids,omitempty"`
 	TotalBalanceCodes map[string]int64    `json:"total_balance_codes,omitempty"`
+	Historic          []BalanceRecord     `json:"historic"`
 	Children          []Account           `json:"children"`
+}
+
+type BalanceRecord struct {
+	Date         LDate               `json:"date"`
+	TotalByIDs   map[uuid.UUID]int64 `json:"total_ids"`
+	TotalByCodes map[string]int64    `json:"total_codes"`
+	DeltaByIDs   map[uuid.UUID]int64 `json:"delta_ids"`
+	DeltaByCodes map[string]int64    `json:"delta_codes"`
+}
+
+func NewBalanceRecord(date LDate) BalanceRecord {
+	br := BalanceRecord{}
+	br.Date = date
+	br.TotalByIDs = make(map[uuid.UUID]int64)
+	br.TotalByCodes = make(map[string]int64)
+	br.DeltaByIDs = make(map[uuid.UUID]int64)
+	br.DeltaByCodes = make(map[string]int64)
+	return br
+}
+
+func (br *BalanceRecord) Yesterday(yesterday_ids map[uuid.UUID]int64, yesterday_codes map[string]int64) {
+	for key, val := range yesterday_ids {
+		br.TotalByIDs[key] = val
+	}
+	for key, val := range yesterday_codes {
+		br.TotalByCodes[key] = val
+	}
+}
+
+func (br *BalanceRecord) Add(id uuid.UUID, code string, amount int64) {
+	// if _, ok := br.DeltaByIDs[id]; !ok {
+	// 	br.DeltaByIDs[id] = 0
+	// }
+	// if _, ok := br.DeltaByCodes[id]; !ok {
+	// 	br.DeltaByCodes[id] = 0
+	// }
+	br.DeltaByIDs[id] += amount
+	br.DeltaByCodes[code] += amount
+	br.TotalByIDs[id] += amount
+	br.TotalByCodes[code] += amount
 }
 
 func (acc Account) String() string {
@@ -34,6 +75,58 @@ func (acc *Account) Validate() error {
 	if len(acc.Name) == 0 {
 		return errors.New("account name must not be empty")
 	}
+	return nil
+}
+
+func (acc *Account) LoadHistoric(from, to LDate) error {
+	acc.Historic = make([]BalanceRecord, 0)
+	var last_br *BalanceRecord
+	err := acc.LoadBalanceAt(from)
+	if err != nil {
+		return err
+	}
+
+	yesterday := LDate{}
+	// Load deltas
+	rows, err := DB.Query("SELECT `AssetID`, `AssetCode`, `MovementDate`, SUM(`Amount`) FROM `movements_view` WHERE `AccountID` = ? AND ? < `MovementDate` AND `MovementDate` <= ? AND `MovementStatus` != 'C' GROUP BY `AccountID`, `AssetID`, `MovementDate` ORDER BY `MovementDate` ASC", acc.ID, from, to)
+	if err == sql.ErrNoRows {
+		return err
+	}
+	if err != nil {
+		Log.WarningF("Error when loading historic: %#v", err)
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var asset_id uuid.UUID
+		var asset_code string
+		var amount int64
+		var mov_date LDate
+		err = rows.Scan(&asset_id, &asset_code, &mov_date, &amount)
+		if err != nil {
+			Log.WarningF("Error when loading historic for account %s: %#v", acc.ID.String(), err)
+			return err
+		}
+		// Do not include zeros
+		if amount == 0 {
+			continue
+		}
+		// Add record
+		if !mov_date.Equals(yesterday) {
+			if last_br == nil {
+				acc.Historic = append(acc.Historic, NewBalanceRecord(mov_date))
+				last_br = &acc.Historic[0]
+				last_br.Yesterday(acc.LocalBalanceIDs, acc.LocalBalanceCodes)
+			} else {
+				acc.Historic = append(acc.Historic, NewBalanceRecord(mov_date))
+				prev_br := last_br
+				last_br = &acc.Historic[len(acc.Historic)-1]
+				last_br.Yesterday(prev_br.TotalByIDs, prev_br.TotalByCodes)
+			}
+		}
+		last_br.Add(asset_id, asset_code, amount)
+	}
+
 	return nil
 }
 
@@ -154,6 +247,24 @@ func (this AccountsDBConn) InBook(book_id uuid.UUID) ([]Account, error) {
 		accounts = append(accounts, account)
 	}
 	return accounts, nil
+}
+
+func (this AccountsDBConn) ByID(acc_id uuid.UUID) (Account, error) {
+	account := Account{}
+
+	err := DB.QueryRow("SELECT `ID`, `ParentID`, `Name`, `BookID` FROM `accounts` WHERE `ID` = ? ORDER BY `Name`", acc_id).Scan(
+		&account.ID,
+		&account.ParentID,
+		&account.Name,
+		&account.BookID)
+	if err == sql.ErrNoRows {
+		return account, err
+	}
+	if err != nil {
+		Log.WarningF("Error when loading account %s: %#v", acc_id.String(), err)
+		return account, err
+	}
+	return account, nil
 }
 
 func (this AccountsDBConn) Set(account *Account) error {

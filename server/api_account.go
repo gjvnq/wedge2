@@ -16,8 +16,38 @@ func AccountList(w http.ResponseWriter, r *http.Request) {
 	GetAccountsCore(wedge.LDateNow(), false, w, r)
 }
 
+func AccountBalanceHistoric(w http.ResponseWriter, r *http.Request) {
+	// Check auth
+	if IsAuthInvalid(w, r) {
+		return
+	}
+
+	// Load account
+	acc, err := wedge.Accounts.ByID(GetUUID("acc-id", r))
+	if err != nil {
+		Log.Warning(err)
+		SendErrCodeAndLog(w, 500, err)
+		return
+	}
+
+	// Check auth
+	if !acc.BookID.Equal(GetUUID("book-id", r)) {
+		SendErrCode(w, 403)
+		return
+	}
+
+	// Get data
+	err = acc.LoadHistoric(GetLDate("from", r), GetLDate("to", r))
+	if err != nil {
+		Log.Warning(err)
+		SendErrCodeAndLog(w, 500, err)
+		return
+	}
+
+	sendJSONResponse(w, acc.Historic)
+}
+
 func AccountBalances(w http.ResponseWriter, r *http.Request) {
-	var err error
 	var time wedge.LDate
 
 	// Check auth
@@ -29,10 +59,7 @@ func AccountBalances(w http.ResponseWriter, r *http.Request) {
 	if GetString("time", r) == "now-utc" {
 		time = wedge.LDateNow()
 	} else {
-		time, err = GetLDate("time", r, w)
-		if err != nil {
-			return
-		}
+		time = GetLDate("time", r)
 	}
 
 	GetAccountsCore(time, false, w, r)

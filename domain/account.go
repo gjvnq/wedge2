@@ -80,6 +80,10 @@ func (acc *Account) LoadHistoric(from, to LDate) error {
 		return err
 	}
 
+	acc.Historic = append(acc.Historic, NewBalanceRecord(from))
+	last_br = &acc.Historic[0]
+	last_br.Yesterday(acc.LocalBalanceIDs, acc.LocalBalanceCodes)
+
 	yesterday := LDate{}
 	// Load deltas
 	rows, err := DB.Query("SELECT `AssetID`, `AssetCode`, `MovementDate`, SUM(`Amount`) FROM `movements_view` WHERE `AccountID` = ? AND ? < `MovementDate` AND `MovementDate` <= ? AND `MovementStatus` != 'C' GROUP BY `AccountID`, `AssetID`, `MovementDate` ORDER BY `MovementDate` ASC", acc.ID, from, to)
@@ -107,18 +111,21 @@ func (acc *Account) LoadHistoric(from, to LDate) error {
 		}
 		// Add record
 		if !mov_date.Equals(yesterday) {
-			if last_br == nil {
-				acc.Historic = append(acc.Historic, NewBalanceRecord(mov_date))
-				last_br = &acc.Historic[0]
-				last_br.Yesterday(acc.LocalBalanceIDs, acc.LocalBalanceCodes)
-			} else {
-				acc.Historic = append(acc.Historic, NewBalanceRecord(mov_date))
-				prev_br := last_br
-				last_br = &acc.Historic[len(acc.Historic)-1]
-				last_br.Yesterday(prev_br.TotalByIDs, prev_br.TotalByCodes)
-			}
+			acc.Historic = append(acc.Historic, NewBalanceRecord(mov_date))
+			prev_br := last_br
+			last_br = &acc.Historic[len(acc.Historic)-1]
+			last_br.Yesterday(prev_br.TotalByIDs, prev_br.TotalByCodes)
 		}
 		last_br.Add(asset_id, asset_code, amount)
+	}
+
+	// Reverse order
+	l := len(acc.Historic) - 1
+	for i := 0; i < l/2; i++ {
+		a := acc.Historic[i]
+		b := acc.Historic[l-i]
+		acc.Historic[i] = b
+		acc.Historic[l-i] = a
 	}
 
 	return nil

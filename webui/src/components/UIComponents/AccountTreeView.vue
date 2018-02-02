@@ -7,7 +7,9 @@
         <div class="card">
           <div class="header">
             <h4 class="title">{{ get_name(model) }}
-              <router-link v-if="model.id !== '00000000-0000-0000-0000-000000000000' && !singleCard" :to="'/book/accounts/'+model.id">({{$t('See movements')}})</router-link></h4>
+              <router-link v-if="model.id !== '00000000-0000-0000-0000-000000000000' && !singleCard" :to="'/book/accounts/'+model.id+'/movements'">({{$t('See movements')}})</router-link>
+              <router-link v-if="model.id !== '00000000-0000-0000-0000-000000000000' && !singleCard" :to="'/book/accounts/'+model.id+'/balances'">({{$t('See balances')}})</router-link>
+            </h4>
           </div>
           <div class="content">
             <p v-html="local_totals(model)"></p>

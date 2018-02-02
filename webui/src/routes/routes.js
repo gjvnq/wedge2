@@ -7,6 +7,7 @@ import NotFound from '../components/GeneralViews/NotFoundPage.vue'
 import Overview from 'src/components/Dashboard/Views/Overview.vue'
 import Assets from 'src/components/Dashboard/Views/Assets.vue'
 import Accounts from 'src/components/Dashboard/Views/Accounts.vue'
+import AccountBalances from 'src/components/Dashboard/Views/AccountBalances.vue'
 import AccountMovements from 'src/components/Dashboard/Views/AccountMovements.vue'
 import Transactions from 'src/components/Dashboard/Views/Transactions.vue'
 import EditTransaction from 'src/components/Dashboard/Views/EditTransaction.vue'
@@ -37,9 +38,14 @@ const routes = [
         component: Accounts
       },
       {
-        path: 'accounts/:acc_id',
+        path: 'accounts/:acc_id/movements',
         name: 'Account Movements',
         component: AccountMovements
+      },
+      {
+        path: 'accounts/:acc_id/balances',
+        name: 'Account Balances',
+        component: AccountBalances
       },
       {
         path: 'assets',

@@ -6,7 +6,7 @@
         <div class="card">
           <div class="content">
             <h4 class="title">{{$t('Movements')}}</h4>
-            <paper-table :data="movements" :columns="tblColumns" :columnsStyles="tblStyles" :click_callback="tblClickCallback" :columnsProperties="tblColumnProperties"/>
+            <paper-table :data="movements" :columns="tblColumns" :columnsStyles="tblStyles" :columnsProperties="tblColumnProperties"/>
           </div>
         </div>
       </div>
@@ -54,6 +54,8 @@
           for (var i = 0; i < this.movements.length; i++) {
             this.movements[i].status_text = statusFixer[this.movements[i].status]
             this.movements[i].amount_human = numeric.format(this.movements[i].amount) + '\u00A0' + this.movements[i].asset_code
+            this.movements[i]._link_txt = 'Edit'
+            this.movements[i]._link_addr = '/book/transactions/' + this.movements[i].transaction_id
           }
         }, response => { // Error
           console.log('ERR', response)
@@ -78,10 +80,7 @@
         movements: [],
         tblColumns: [...tableColumns],
         tblStyles: [...tableColumnsStyle],
-        tblColumnProperties: [...tableColumnsProperties],
-        tblClickCallback: function (el) {
-          this.$router.push('../transactions/' + el.transaction_id)
-        }
+        tblColumnProperties: [...tableColumnsProperties]
       }
     }
   }

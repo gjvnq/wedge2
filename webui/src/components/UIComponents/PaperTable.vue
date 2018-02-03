@@ -16,6 +16,7 @@
           <tr v-for="item in data" :class="trClass" @click="click_event(item)">
             <td v-for="(column, col_index) in columns" :class="itemClass(col_index)" v-if="hasValue(item, column, col_index)">{{itemValue(item, column, col_index)}}</td>
             <td v-html="itemValue(item, '_extra')"></td>
+            <td v-if="hasValue(item, '_link_txt') && hasValue(item, '_link_addr')"><router-link :to="itemValue(item, '_link_addr')">{{$t(itemValue(item, '_link_txt'))}}</router-link></td>
           </tr>
         </tbody>
       </table>
@@ -62,7 +63,7 @@
         return this.itemValue(item, column, index) !== 'undefined'
       },
       itemValue (item, column, index) {
-        if (this.columnsProperties.length !== 0) {
+        if (this.columnsProperties.length !== 0 && typeof index === 'number') {
           return item[this.columnsProperties[index]]
         }
         return item[column.toLowerCase()]

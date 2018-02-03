@@ -64,6 +64,7 @@ export const messages = {
     'Total': 'Total',
     'Account Balances': 'Saldos da Conta',
     'Balance': 'Saldo',
-    'See balances': 'Ver saldos'
+    'See balances': 'Ver saldos',
+    'Edit': 'Editar'
   }
 }

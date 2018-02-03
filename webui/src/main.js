@@ -40,7 +40,14 @@ Vue.use(SideBar)
 // configure router
 const router = new VueRouter({
   routes, // short for routes: routes
-  linkActiveClass: 'active'
+  linkActiveClass: 'active',
+  scrollBehavior (to, from, savedPosition) {
+    if (savedPosition) {
+      return savedPosition
+    } else {
+      return { x: 0, y: 0 }
+    }
+  }
 })
 
 // configure i18n

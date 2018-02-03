@@ -121,7 +121,7 @@ func (acc *Account) LoadHistoric(from, to LDate) error {
 
 	// Reverse order
 	l := len(acc.Historic) - 1
-	for i := 0; i < l/2; i++ {
+	for i := 0; i <= l/2; i++ {
 		a := acc.Historic[i]
 		b := acc.Historic[l-i]
 		acc.Historic[i] = b

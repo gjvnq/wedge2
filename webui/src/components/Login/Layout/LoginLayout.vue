@@ -6,6 +6,25 @@
           <div class="row">
             <div class="col-md-8 col-md-offset-2 text-center">
               <h2 class="title text-info">wedge²</h2>
+            </div>
+          </div>
+          <div class="row">
+            <form class="form-horizontal">
+              <div class="form-group">
+                <div class="col-md-1 col-md-offset-4 text-right">
+                  <label for="inLang" class="control-label"><i style="font-size:200%" class="fa fa-language"></i></label>
+                </div>
+                <div class="col-md-2">
+                  <select class="form-control" id="inLang" v-model="lang">
+                    <option value="en">English</option>
+                    <option value="pt">Português</option>
+                  </select>
+                </div>
+              </div>
+            </form> 
+          </div>
+          <div class="row">
+            <div class="col-md-8 col-md-offset-2 text-center">
               <form>
                 <div class="form-group">
                   <label for="inBookId" v-t="'Book'"></label>
@@ -59,8 +78,8 @@
           this.flagBtn = true
           Vue.http.options.book_id = fd['book_id']
           Vue.http.headers.common['Authorization'] = 'Bearer ' + response.bodyText
-          localStorage.setItem('Authorization', response.bodyText)
-          localStorage.setItem('BookId', fd['book_id'])
+          localStorage.setItem('wedge-Authorization', response.bodyText)
+          localStorage.setItem('wedge-BookId', fd['book_id'])
           this.$router.push('/book')
         }, response => { // Error
           console.log('err', response)
@@ -96,6 +115,17 @@
         flagHideErrPass: true,
         flagHideErrConn: true,
         flagBtn: true
+      }
+    },
+    computed: {
+      lang: {
+        get () {
+          return this.$i18n.locale
+        },
+        set (val) {
+          this.$i18n.locale = val
+          localStorage.setItem('wedge-lang', val)
+        }
       }
     }
   }

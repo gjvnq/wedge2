@@ -52,8 +52,9 @@ const router = new VueRouter({
 
 // configure i18n
 const i18n = new VueI18n({
-  locale: 'pt', // set locale
-  messages // set locale messages
+  locale: 'pt',
+  fallbackLocale: 'en',
+  messages
 })
 
 // global library setup

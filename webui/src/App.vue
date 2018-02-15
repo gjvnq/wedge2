@@ -32,7 +32,11 @@
 </template>
 
 <script>
-  export default {}
+  export default {
+    beforeMount () {
+      this.$i18n.locale = localStorage.getItem('wedge-lang')
+    }
+  }
 </script>
 
 <style lang="scss"></style>

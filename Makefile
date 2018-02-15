@@ -31,5 +31,8 @@ $(IMG_PATH)/apple-icon.png: $(IMG_PATH)/favicon.svg
 
 api: server/server
 
+api-run: server/server
+	cd server && ./server
+
 api-dev: server/server server/main.go
-	reflex -s -r '(server|domain)/.*\.go$$' make api
+	reflex -s -r '(server|domain)/.*\.go$$' make api-run

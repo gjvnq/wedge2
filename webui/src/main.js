@@ -69,8 +69,8 @@ Vue.http.options.root = '/api'
 Vue.http.options.root = '//localhost:8081/'
 Vue.http.options.book_id = 'no-book'
 Vue.http.options.emulateJSON = false
-Vue.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('Authorization')
-Vue.http.options.book_id = localStorage.getItem('BookId')
+Vue.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('wedge-Authorization')
+Vue.http.options.book_id = localStorage.getItem('wedge-BookId')
 
 Vue.http.interceptors.push(function (request, next) {
   request.url = request.url.replace('{book-id}', Vue.http.options.book_id)

@@ -17,12 +17,26 @@ import (
 
 var Log *logger.Logger
 var JWTKey []byte
+var Config ConfigS
 
 func main() {
 	var err error
 
-	// Set Logger
 	Log, err = logger.New("main", 1, os.Stdout)
+	Config = LoadConfigFile()
+
+	// Set Logger
+	if Config.DevMode == false {
+		Log.Levels["INFO"] = false
+		Log.Levels["DEBUG"] = false
+	}
+
+	if Config.DevMode {
+		Log.Notice("Using development mode")
+	} else {
+		Log.Notice("Using production mode")
+	}
+
 	if err != nil {
 		panic(err)
 	}
@@ -36,7 +50,9 @@ func main() {
 		return
 	}
 	// Hack for dev
-	JWTKey = make([]byte, 16)
+	if Config.DevMode {
+		JWTKey = make([]byte, 16)
+	}
 
 	// Connect Database
 	wedge.DB, err = sql.Open("mysql", GetDBStringURI())
@@ -62,14 +78,9 @@ func main() {
 	router.HandleFunc("/auth", Auth).Methods("POST")
 	router.HandleFunc("/auth/test", AuthTest).Methods("POST")
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8081"
-	}
-
 	handler := CorsMiddleware(router)
-	Log.Notice("Now listening...")
-	Log.Fatal(http.ListenAndServe(":"+port, handler))
+	Log.Notice("Now listening... on " + Config.ListenOn + ":" + Config.Port)
+	Log.Fatal(http.ListenAndServe(Config.ListenOn+":"+Config.Port, handler))
 }
 
 func CorsMiddleware(next http.Handler) http.Handler {

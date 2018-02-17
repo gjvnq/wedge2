@@ -1,3 +1,4 @@
+dist/*
 server/server
 server/config.json
 webui/node_modules

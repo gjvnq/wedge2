@@ -1,8 +1,16 @@
-.PHONY: webui api
+.PHONY: webui api dist
 IMG_PATH=webui/static/img/
 
-webui: webui/config/** webui/src/** webui/static/** webui/test/** $(IMG_PATH)/favicon.ico
+dist: dist/wedge-webui.tgz dist/wedge-api.bin
+	
+webui: webui/dist/webui.tgz
+
+dist/wedge-api.bin: server/server
+	cp server/server dist/wedge-api.bin
+
+dist/wedge-webui.tgz: webui/config/** webui/src/** webui/static/** webui/test/** $(IMG_PATH)/favicon.ico
 	cd webui && npm run build
+	cd webui/dist && tar czf ../../dist/wedge-webui.tgz .
 
 webui-dev: webui/config/** webui/src/** webui/static/** webui/test/** $(IMG_PATH)/favicon.ico
 	cd webui && npm start
@@ -35,4 +43,4 @@ api-run: server/server
 	cd server && ./server
 
 api-dev: server/server server/main.go
-	reflex -s -r '(server|domain)/.*\.go$$' make api-run
+	reflex -s -r '(server|domain)/.*\.(go|json)$$' make api-run

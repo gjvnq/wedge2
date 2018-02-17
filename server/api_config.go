@@ -3,26 +3,43 @@ package main
 import (
 	"encoding/json"
 	"io/ioutil"
+	"os"
 )
 
 type ConfigS struct {
-	MySQL struct {
+	ListenOn string
+	DevMode  bool
+	Port     string
+	MySQL    struct {
 		DB       string
 		User     string
 		Password string
 	}
 }
 
-func GetDBStringURI() string {
+func LoadConfigFile() ConfigS {
 	var dat ConfigS
 
-	byt, err := ioutil.ReadFile("config.json")
+	path := os.Getenv("CONFIG_FILE")
+	if path == "" {
+		path = "config.json"
+	}
+
+	byt, err := ioutil.ReadFile(path)
 	if err != nil {
-		Log.FatalF("Failed to open config.json file: %s", err.Error())
+		Log.FatalF("Failed to open '%s' file: %s", path, err.Error())
 	}
 	err = json.Unmarshal(byt, &dat)
 	if err != nil {
-		Log.FatalF("Failed to parse config.json file: %s", err.Error())
+		Log.FatalF("Failed to parse '%s' file: %s", path, err.Error())
 	}
-	return "" + dat.MySQL.User + ":" + dat.MySQL.Password + "@/" + dat.MySQL.DB + "?charset=utf8&parseTime=True&loc=Local"
+
+	if dat.Port == "" {
+		Log.FatalF("Config file '%s' MUST set the port", path)
+	}
+	return dat
+}
+
+func GetDBStringURI() string {
+	return "" + Config.MySQL.User + ":" + Config.MySQL.Password + "@/" + Config.MySQL.DB + "?charset=utf8&parseTime=True&loc=Local"
 }

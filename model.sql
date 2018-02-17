@@ -1,16 +1,23 @@
 -- phpMyAdmin SQL Dump
--- version 4.7.6
+-- version 4.7.7
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost
--- Generation Time: Jan 20, 2018 at 01:08 AM
+-- Generation Time: Feb 17, 2018 at 11:37 PM
 -- Server version: 10.1.30-MariaDB
--- PHP Version: 7.2.0
+-- PHP Version: 7.2.2
 
+SET FOREIGN_KEY_CHECKS=0;
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
 
 --
 -- Database: `wedge`
@@ -110,17 +117,19 @@ CREATE TABLE `movements` (
 -- (See below for the actual view)
 --
 CREATE TABLE `movements_view` (
-`MovementID` binary(16)
-,`TransactionID` binary(16)
-,`AccountID` binary(16)
+`TransactionID` binary(16)
+,`TransactionName` varchar(255)
+,`TransactionDate` int(8)
 ,`AccountParentID` binary(16)
 ,`AccountBookID` binary(16)
-,`LocalDate` int(8)
-,`Status` char(1)
+,`MovementID` binary(16)
+,`MovementDate` int(8)
+,`MovementStatus` char(1)
+,`AccountID` binary(16)
 ,`AccountName` varchar(175)
-,`AssetID` binary(16)
-,`AssetCode` varchar(45)
 ,`Amount` bigint(50)
+,`AssetCode` varchar(45)
+,`AssetID` binary(16)
 );
 
 -- --------------------------------------------------------
@@ -157,24 +166,25 @@ CREATE TABLE `transactions` (
 --
 DROP TABLE IF EXISTS `movements_view`;
 
-CREATE OR REPLACE VIEW `movements_view`  AS SELECT
-  `movements`.`TransactionID` AS `TransactionID`,
-  `transactions`.`Name` AS `TransactionName`,
-  `transactions`.`LocalDate` AS `TransactionDate`,
-  `accounts`.`ParentID` AS `AccountParentID`,
-  `accounts`.`BookID` AS `AccountBookID`,
-  `movements`.`ID` AS `MovementID`,
-  `movements`.`LocalDate` AS `MovementDate`,
-  `movements`.`Status` AS `MovementStatus`,
-  `movements`.`AccountID` AS `AccountID`,
-  `accounts`.`Name` AS `AccountName`,
-  `movements`.`Amount` AS `Amount`,
-  `assets`.`Code` AS `AssetCode`,
-  `movements`.`AssetID` AS `AssetID`
-  FROM ((
-    (`movements` JOIN `accounts` ON((`movements`.`AccountID` = `accounts`.`ID`)))
+CREATE VIEW `movements_view` AS
+  SELECT
+    `movements`.`TransactionID` AS `TransactionID`,
+    `transactions`.`Name` AS `TransactionName`,
+    `transactions`.`LocalDate` AS `TransactionDate`,
+    `accounts`.`ParentID` AS `AccountParentID`,
+    `accounts`.`BookID` AS `AccountBookID`,
+    `movements`.`ID` AS `MovementID`,
+    `movements`.`LocalDate` AS `MovementDate`,
+    `movements`.`Status` AS `MovementStatus`,
+    `movements`.`AccountID` AS `AccountID`,
+    `accounts`.`Name` AS `AccountName`,
+    `movements`.`Amount` AS `Amount`,
+    `assets`.`Code` AS `AssetCode`,
+    `movements`.`AssetID` AS `AssetID`
+  FROM (((`movements` 
+    JOIN `accounts` ON((`movements`.`AccountID` = `accounts`.`ID`)))
     JOIN `assets` ON((`movements`.`AssetID` = `assets`.`ID`)))
-    JOIN `transactions` ON((`movements`.`TransactionID` = `transactions`.`ID`)))
+    JOIN `transactions` ON((`movements`.`TransactionID` = `transactions`.`ID`)));
 
 --
 -- Indexes for dumped tables
@@ -258,5 +268,9 @@ ALTER TABLE `transactions`
 --
 ALTER TABLE `tags`
   MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+SET FOREIGN_KEY_CHECKS=1;
 COMMIT;
 
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

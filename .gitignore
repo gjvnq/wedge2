@@ -1,3 +1,4 @@
+admin/
 dist/*
 server/server
 server/config.json

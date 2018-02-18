@@ -140,10 +140,10 @@ CREATE TABLE `movements_view` (
 
 CREATE TABLE `tags` (
   `Id` int(11) NOT NULL,
-  `Table` varchar(45) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `ItemUUID` binary(16) NOT NULL,
+  `Table` varchar(45) COLLATE ascii_general_ci NOT NULL,
+  `ItemID` binary(16) NOT NULL,
   `Tag` varchar(160) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `BookUUID` binary(16) NOT NULL
+  `BookID` binary(16) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -248,8 +248,8 @@ ALTER TABLE `movements`
 --
 ALTER TABLE `tags`
   ADD PRIMARY KEY (`Id`),
-  ADD UNIQUE KEY `UNIQ` (`ItemUUID`,`Tag`,`BookUUID`),
-  ADD KEY `fk_tags_1_idx` (`BookUUID`);
+  ADD UNIQUE KEY `UNIQ` (`ItemID`,`Tag`,`BookID`),
+  ADD KEY `Table` (`Table`);
 
 --
 -- Indexes for table `transactions`

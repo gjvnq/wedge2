@@ -65,8 +65,10 @@ Object.defineProperty(Vue.prototype, '$Chartist', {
 })
 
 /* eslint-disable no-new */
-Vue.http.options.root = '/api'
-Vue.http.options.root = '//localhost:8081/'
+Vue.http.options.root = window.location.origin + '/wedge/api/'
+if (window.location.hostname === 'localhost') {
+  Vue.http.options.root = '//localhost:8081/'
+}
 Vue.http.options.book_id = 'no-book'
 Vue.http.options.emulateJSON = false
 Vue.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('wedge-Authorization')

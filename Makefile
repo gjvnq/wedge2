@@ -3,7 +3,7 @@ IMG_PATH=webui/static/img/
 
 dist: dist/wedge-webui.tgz dist/wedge-api.bin
 	
-webui: webui/dist/webui.tgz
+webui: dist/wedge-webui.tgz
 
 dist/wedge-api.bin: server/server
 	cp server/server dist/wedge-api.bin

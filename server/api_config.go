@@ -10,11 +10,7 @@ type ConfigS struct {
 	ListenOn string
 	DevMode  bool
 	Port     string
-	MySQL    struct {
-		DB       string
-		User     string
-		Password string
-	}
+	MySQL    string
 }
 
 func LoadConfigFile() ConfigS {
@@ -38,8 +34,4 @@ func LoadConfigFile() ConfigS {
 		Log.FatalF("Config file '%s' MUST set the port", path)
 	}
 	return dat
-}
-
-func GetDBStringURI() string {
-	return "" + Config.MySQL.User + ":" + Config.MySQL.Password + "@/" + Config.MySQL.DB + "?charset=utf8&parseTime=True&loc=Local"
 }

@@ -55,7 +55,7 @@ func main() {
 	}
 
 	// Connect Database
-	wedge.DB, err = sql.Open("mysql", GetDBStringURI())
+	wedge.DB, err = sql.Open("mysql", Config.MySQL)
 	if err != nil {
 		Log.FatalF("Failed to open database %s", err)
 	}

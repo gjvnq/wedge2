@@ -1,10 +1,7 @@
-[X] Use cards for each account, displaying name and balance
-    [X] Show both balance for the account itself AND balance including children accounts
-    [ ] Show movements by account
 [ ] Edit an asset's value
 [ ] Edit an asset
 [ ] Automatically load asset value for currencies
-[ ] Automatically load asset value for B3
+[ ] Automatically load asset value for B3 stocks
 [ ] Filter transactions by time period
 [ ] Plot account's totals over a time period
     [ ] With the assets (raw value) in a stacked line chart

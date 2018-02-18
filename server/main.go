@@ -59,6 +59,7 @@ func main() {
 	if err != nil {
 		Log.FatalF("Failed to open database %s", err)
 	}
+	wedge.PrepareStatments()
 
 	// Listen for connections
 	router := mux.NewRouter().StrictSlash(true)

@@ -182,11 +182,11 @@ CREATE OR REPLACE VIEW `movements_view` AS
     `assets`.`Code` AS `AssetCode`,
     `movements`.`AssetID` AS `AssetID`,
     COALESCE(GROUP_CONCAT(`tags`.`Tag` SEPARATOR ','), '') AS `Tags`
-  FROM ((((`movements` 
-    LEFT JOIN `accounts` ON((`movements`.`AccountID` = `accounts`.`ID`)))
-    LEFT JOIN `assets` ON((`movements`.`AssetID` = `assets`.`ID`)))
-    LEFT JOIN `transactions` ON((`movements`.`TransactionID` = `transactions`.`ID`)))
-    LEFT JOIN `tags` ON((`movements`.`ID` = `tags`.`ItemID`)))
+  FROM `movements` 
+    LEFT JOIN `transactions` ON(`movements`.`TransactionID` = `transactions`.`ID`)
+    LEFT JOIN `assets` ON(`movements`.`AssetID` = `assets`.`ID`)
+    LEFT JOIN `tags` ON(`movements`.`ID` = `tags`.`ItemID`)
+    LEFT JOIN `accounts` ON(`movements`.`AccountID` = `accounts`.`ID`)
   GROUP BY `movements`.`ID`;
 
 --

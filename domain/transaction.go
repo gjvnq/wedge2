@@ -22,6 +22,8 @@ type Transaction struct {
 	Totals    map[uuid.UUID]int64 `json:"totals"`
 }
 
+var fillMovementsStmt *sql.Stmt
+
 func (tr *Transaction) Init() {
 	if tr.Totals == nil {
 		tr.Totals = make(map[uuid.UUID]int64)
@@ -122,7 +124,7 @@ func (this TransactionsDBConn) GetByIDAdv(tr_id uuid.UUID, include_movements boo
 
 func (this TransactionsDBConn) FillMovements(transaction *Transaction) error {
 	transaction.Movements = make([]Movement, 0)
-	rows, err := DB.Query("SELECT `MovementID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `MovementStatus`, `MovementDate`, `MovementNotes`, `Tags` FROM `movements_view` WHERE `TransactionID` = ? ORDER BY `MovementDate`, `Amount`", transaction.ID)
+	rows, err := fillMovementsStmt.Query(transaction.ID)
 	if err == sql.ErrNoRows {
 		return FixError(err)
 	}

@@ -3,6 +3,7 @@ package wedge
 import (
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/gjvnq/go.uuid"
 )
@@ -13,11 +14,33 @@ var Tags TagsDBConn
 
 type TagI interface {
 	GetID() uuid.UUID
-	GetTable() string
 	GetBookID() uuid.UUID
 }
 
 func (this TagsDBConn) Set(obj TagI, tags []string) error {
+	// Start transaction
+	tx, err := DB.Begin()
+	if err != nil {
+		tx.Rollback()
+		Log.WarningF("Error when creating transaction: %#v", err)
+		return FixError(err)
+	}
+
+	err = this.SetTX(tx, obj, tags)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		tx.Rollback()
+		Log.WarningF("Error when finishing db transaction: %#v", err)
+		return FixError(err)
+	}
+	return nil
+}
+
+func (this TagsDBConn) SetTX(tx *sql.Tx, obj TagI, tags []string) error {
 	var err error
 
 	// Check for nil
@@ -28,15 +51,8 @@ func (this TagsDBConn) Set(obj TagI, tags []string) error {
 		tags = make([]string, 0)
 	}
 
-	// Start transaction
-	tx, err := DB.Begin()
-	if err != nil {
-		tx.Rollback()
-		Log.WarningF("Error when creating transaction: %#v", err)
-		return FixError(err)
-	}
 	// First delete ALL tags for this object
-	_, err = DB.Exec("DELETE `tags` WHERE `ItemID` = ?", obj.GetID())
+	_, err = DB.Exec("DELETE FROM `tags` WHERE `ItemID` = ?", obj.GetID())
 
 	// Avoid stupid work
 	if len(tags) == 0 {
@@ -49,28 +65,21 @@ func (this TagsDBConn) Set(obj TagI, tags []string) error {
 	}
 
 	// Now reinsert tags
-	sql_str := "INSERT INTO `tags` (`Table`, `ItemID`, `BookID`, `Tag`) VALUES "
+	sql_str := "INSERT INTO `tags` (`ItemID`, `BookID`, `Tag`) VALUES "
 	vals := make([]interface{}, 0)
 	for i, tag := range tags {
 		if i == 0 {
-			sql_str += "(?, ?, ?, ?)"
+			sql_str += "(?, ?, ?)"
 		} else {
-			sql_str += ", (?, ?, ?, ?)"
+			sql_str += ", (?, ?, ?)"
 		}
-		vals = append(vals, obj.GetTable(), obj.GetID(), obj.GetBookID(), tag)
+		vals = append(vals, obj.GetID(), obj.GetBookID(), strings.TrimSpace(tag))
 	}
 	stmt, _ := DB.Prepare(sql_str)
 	_, err = stmt.Exec(vals...)
 	if err != nil {
 		tx.Rollback()
 		Log.WarningF("Error when saving new tags: %#v", err)
-		return FixError(err)
-	}
-
-	err = tx.Commit()
-	if err != nil {
-		tx.Rollback()
-		Log.WarningF("Error when finishing db transaction: %#v", err)
 		return FixError(err)
 	}
 

@@ -34,7 +34,7 @@
       <div class="col-md-7" :class="{ 'has-error': tagsErr }">
         <div class="form-group">
           <label>{{$t('Tags (comma separated)')}}</label>
-          <input type="text" class="form-control border-input" v-model="tags_user" @input="computeTags" :disabled="disabled" @change="onChange">
+          <input type="text" class="form-control border-input" v-model="tags_user" :disabled="disabled" @change="onChange">
         </div>
       </div>
       <div class="col-md-2" :class="{ 'has-error': startErr }">
@@ -80,37 +80,18 @@
       },
       index: Number,
       value: {
-        name: {
-          type: String,
-          default: ''
-        },
-        unit_cost: {
-          type: Number,
-          default: 0
-        },
-        quantity: {
-          type: Number,
-          default: 0
-        },
-        total_cost: {
-          type: Number,
-          default: 0
-        },
-        asset_id: {
-          type: String,
-          default: ''
-        },
-        period_start: {
-          type: String,
-          default: ''
-        },
-        period_end: {
-          type: String,
-          default: ''
-        },
-        tags: {
-          type: Array,
-          default: []
+        type: Object,
+        default: function () {
+          return {
+            value: '',
+            unit_cost: 0,
+            quantity: 0,
+            total_cost: 0,
+            asset_id: '',
+            period_start: '',
+            period_end: '',
+            tags: []
+          }
         }
       }
     },
@@ -123,13 +104,15 @@
       }
       if (this.value.tags === undefined) {
         this.value.tags = []
+      } else {
+        this.tags_user = this.value.tags.join(', ')
       }
     },
     methods: {
       onChange (e) {
         this.value.unit_cost = Math.floor(this.unit_cost_user * 1E8)
         this.value.total_cost = Math.floor(this.total_cost_user * 1E8)
-        this.tags_user = this.value.tags.join(',')
+        this.computeTags()
         this.$emit('change', this.value)
         if (this.validate_on_change) {
           this.validate()

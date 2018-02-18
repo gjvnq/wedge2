@@ -2,6 +2,7 @@ package wedge
 
 import (
 	"database/sql"
+	"strings"
 
 	"github.com/gjvnq/go.uuid"
 )
@@ -11,11 +12,11 @@ type TransactionsDBConn struct{}
 var Transactions TransactionsDBConn
 
 type Transaction struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	LocalDate LDate     `json:"local_date"`
-	BookID    uuid.UUID `json:"book_id"`
-	// Associations
+	ID        uuid.UUID           `json:"id"`
+	Name      string              `json:"name"`
+	LocalDate LDate               `json:"local_date"`
+	BookID    uuid.UUID           `json:"book_id"`
+	Tags      []string            `json:"tags"`
 	Movements []Movement          `json:"movements"`
 	Items     []Item              `json:"items"`
 	Totals    map[uuid.UUID]int64 `json:"totals"`
@@ -25,6 +26,17 @@ func (tr *Transaction) Init() {
 	if tr.Totals == nil {
 		tr.Totals = make(map[uuid.UUID]int64)
 	}
+	if tr.Tags == nil {
+		tr.Tags = make([]string, 0)
+	}
+}
+
+func (tr Transaction) GetID() uuid.UUID {
+	return tr.ID
+}
+
+func (tr Transaction) GetBookID() uuid.UUID {
+	return tr.BookID
 }
 
 func (tr *Transaction) ComputeTotals() {
@@ -45,6 +57,7 @@ func (this TransactionsDBConn) InBook(book_id uuid.UUID) ([]Transaction, error) 
 		return nil, err
 	}
 	defer rows.Close()
+	Log.Debug("Before loop")
 	// Load basic stuff
 	for rows.Next() {
 		transaction := Transaction{}
@@ -59,29 +72,34 @@ func (this TransactionsDBConn) InBook(book_id uuid.UUID) ([]Transaction, error) 
 		}
 		transactions = append(transactions, transaction)
 	}
+	Log.Debug("After loop")
 	// Fill in stuff
 	for i := 0; i < len(transactions); i++ {
 		Transactions.FillMovements(&transactions[i])
-		Transactions.FillItems(&transactions[i])
+		// Transactions.FillItems(&transactions[i])
 	}
+	Log.Debug("After fill")
 	return transactions, nil
 }
 
 func (this TransactionsDBConn) GetByID(tr_id uuid.UUID) (Transaction, error, bool) {
-	return Transactions.GetByIDAdv(tr_id, true, true)
+	return Transactions.GetByIDAdv(tr_id, true, true, true)
 }
 
 func (this TransactionsDBConn) GetHeadByID(tr_id uuid.UUID) (Transaction, error, bool) {
-	return Transactions.GetByIDAdv(tr_id, false, false)
+	return Transactions.GetByIDAdv(tr_id, false, false, false)
 }
 
-func (this TransactionsDBConn) GetByIDAdv(tr_id uuid.UUID, include_movements bool, include_itens bool) (Transaction, error, bool) {
+func (this TransactionsDBConn) GetByIDAdv(tr_id uuid.UUID, include_movements bool, include_itens bool, include_tags bool) (Transaction, error, bool) {
 	tr := Transaction{}
-	err := DB.QueryRow("SELECT `ID`, `Name`, `LocalDate`, `BookID` FROM `transactions` WHERE `ID` = ? ORDER BY `LocalDate`, `Name`", tr_id).Scan(
+	str := ""
+	err := DB.QueryRow("SELECT `ID`, `Name`, `LocalDate`, `BookID`, `Tags` FROM `transactions_view` WHERE `ID` = ? ORDER BY `LocalDate`, `Name`", tr_id).Scan(
 		&tr.ID,
 		&tr.Name,
 		&tr.LocalDate,
-		&tr.BookID)
+		&tr.BookID,
+		&str)
+	tr.Tags = strings.Split(str, ",")
 	if err == sql.ErrNoRows {
 		return tr, nil, true
 	}
@@ -104,7 +122,7 @@ func (this TransactionsDBConn) GetByIDAdv(tr_id uuid.UUID, include_movements boo
 
 func (this TransactionsDBConn) FillMovements(transaction *Transaction) error {
 	transaction.Movements = make([]Movement, 0)
-	rows, err := DB.Query("SELECT `ID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `Status`, `LocalDate`, `Notes` FROM `movements` WHERE `TransactionID` = ? ORDER BY `LocalDate`, `Amount`", transaction.ID)
+	rows, err := DB.Query("SELECT `MovementID`, `AccountID`, `AssetID`, `TransactionID`, `Amount`, `MovementStatus`, `MovementDate`, `MovementNotes`, `Tags` FROM `movements_view` WHERE `TransactionID` = ? ORDER BY `MovementDate`, `Amount`", transaction.ID)
 	if err == sql.ErrNoRows {
 		return FixError(err)
 	}
@@ -115,6 +133,7 @@ func (this TransactionsDBConn) FillMovements(transaction *Transaction) error {
 	defer rows.Close()
 	for rows.Next() {
 		movement := Movement{}
+		str := ""
 		err = rows.Scan(
 			&movement.ID,
 			&movement.AccountID,
@@ -123,11 +142,14 @@ func (this TransactionsDBConn) FillMovements(transaction *Transaction) error {
 			&movement.Amount,
 			&movement.Status,
 			&movement.LocalDate,
-			&movement.Notes)
+			&movement.Notes,
+			&str)
+		movement.Tags = strings.Split(str, ",")
 		if err != nil {
 			Log.WarningF("Error when loading movement %s: %#v", movement.ID.String(), err)
 			return FixError(err)
 		}
+		movement.BookID = transaction.BookID
 		transaction.Movements = append(transaction.Movements, movement)
 	}
 	transaction.ComputeTotals()
@@ -136,7 +158,7 @@ func (this TransactionsDBConn) FillMovements(transaction *Transaction) error {
 
 func (this TransactionsDBConn) FillItems(transaction *Transaction) error {
 	transaction.Items = make([]Item, 0)
-	rows, err := DB.Query("SELECT `ID`, `AssetID`, `TransactionID`, `Name`, `UnitCost`, `Qty`, `TotalCost`, `PeriodEnd`, `PeriodStart` FROM `items` WHERE `TransactionID` = ? ORDER BY `Name`, `TotalCost`", transaction.ID)
+	rows, err := DB.Query("SELECT `ID`, `AssetID`, `TransactionID`, `Name`, `UnitCost`, `Qty`, `TotalCost`, `PeriodEnd`, `PeriodStart`, `Tags` FROM `items_view` WHERE `TransactionID` = ? ORDER BY `Name`, `TotalCost`", transaction.ID)
 	if err == sql.ErrNoRows {
 		return FixError(err)
 	}
@@ -147,6 +169,7 @@ func (this TransactionsDBConn) FillItems(transaction *Transaction) error {
 	defer rows.Close()
 	for rows.Next() {
 		item := Item{}
+		str := ""
 		err = rows.Scan(
 			&item.ID,
 			&item.AssetID,
@@ -156,11 +179,14 @@ func (this TransactionsDBConn) FillItems(transaction *Transaction) error {
 			&item.Qty,
 			&item.TotalCost,
 			&item.PeriodStart,
-			&item.PeriodEnd)
+			&item.PeriodEnd,
+			&str)
+		item.Tags = strings.Split(str, ",")
 		if err != nil {
 			Log.WarningF("Error when loading item %s: %#v", item.ID.String(), err)
 			return FixError(err)
 		}
+		item.BookID = transaction.BookID
 		transaction.Items = append(transaction.Items, item)
 	}
 	return nil
@@ -238,6 +264,12 @@ func (this TransactionsDBConn) Set(transaction *Transaction) error {
 			item.TotalCost,
 			item.PeriodStart,
 			item.PeriodEnd)
+		if err != nil {
+			tx.Rollback()
+			Log.WarningF("Error when creating transaction: %#v", err)
+			return FixError(err)
+		}
+		err = Tags.SetTX(tx, item, item.Tags)
 		if err != nil {
 			tx.Rollback()
 			Log.WarningF("Error when creating transaction: %#v", err)

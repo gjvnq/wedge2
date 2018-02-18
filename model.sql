@@ -140,7 +140,6 @@ CREATE TABLE `movements_view` (
 
 CREATE TABLE `tags` (
   `Id` int(11) NOT NULL,
-  `Table` varchar(45) COLLATE ascii_general_ci NOT NULL,
   `ItemID` binary(16) NOT NULL,
   `Tag` varchar(160) COLLATE utf8mb4_unicode_ci NOT NULL,
   `BookID` binary(16) NOT NULL
@@ -166,25 +165,55 @@ CREATE TABLE `transactions` (
 --
 DROP TABLE IF EXISTS `movements_view`;
 
-CREATE VIEW `movements_view` AS
+CREATE OR REPLACE VIEW `movements_view` AS
   SELECT
     `movements`.`TransactionID` AS `TransactionID`,
     `transactions`.`Name` AS `TransactionName`,
     `transactions`.`LocalDate` AS `TransactionDate`,
     `accounts`.`ParentID` AS `AccountParentID`,
-    `accounts`.`BookID` AS `AccountBookID`,
+    `accounts`.`BookID` AS `BookID`,
     `movements`.`ID` AS `MovementID`,
     `movements`.`LocalDate` AS `MovementDate`,
+    `movements`.`Notes` AS `MovementNotes`,
     `movements`.`Status` AS `MovementStatus`,
     `movements`.`AccountID` AS `AccountID`,
     `accounts`.`Name` AS `AccountName`,
     `movements`.`Amount` AS `Amount`,
     `assets`.`Code` AS `AssetCode`,
-    `movements`.`AssetID` AS `AssetID`
-  FROM (((`movements` 
-    JOIN `accounts` ON((`movements`.`AccountID` = `accounts`.`ID`)))
-    JOIN `assets` ON((`movements`.`AssetID` = `assets`.`ID`)))
-    JOIN `transactions` ON((`movements`.`TransactionID` = `transactions`.`ID`)));
+    `movements`.`AssetID` AS `AssetID`,
+    COALESCE(GROUP_CONCAT(`tags`.`Tag` SEPARATOR ','), '') AS `Tags`
+  FROM ((((`movements` 
+    LEFT JOIN `accounts` ON((`movements`.`AccountID` = `accounts`.`ID`)))
+    LEFT JOIN `assets` ON((`movements`.`AssetID` = `assets`.`ID`)))
+    LEFT JOIN `transactions` ON((`movements`.`TransactionID` = `transactions`.`ID`)))
+    LEFT JOIN `tags` ON((`movements`.`ID` = `tags`.`ItemID`)))
+  GROUP BY `movements`.`ID`;
+
+--
+-- Structure for view `items_view`
+--
+DROP TABLE IF EXISTS `items_view`;
+
+CREATE OR REPLACE VIEW `items_view` AS
+  SELECT 
+    `items`.*,
+    COALESCE(GROUP_CONCAT(`tags`.`Tag` SEPARATOR ','), '') AS `Tags`
+  FROM (`items`
+    LEFT JOIN `tags` ON((`items`.`ID` = `tags`.`ItemID`)))
+  GROUP BY `items`.`ID`;
+
+--
+-- Structure for view `transactions_view`
+--
+DROP TABLE IF EXISTS `transactions_view`;
+
+CREATE OR REPLACE VIEW `transactions_view` AS
+  SELECT 
+    `transactions`.*,
+    COALESCE(GROUP_CONCAT(`tags`.`Tag` SEPARATOR ','), '') AS `Tags`
+  FROM (`transactions`
+    LEFT JOIN `tags` ON((`transactions`.`ID` = `tags`.`ItemID`)))
+  GROUP BY `transactions`.`ID`;
 
 --
 -- Indexes for dumped tables
@@ -248,8 +277,7 @@ ALTER TABLE `movements`
 --
 ALTER TABLE `tags`
   ADD PRIMARY KEY (`Id`),
-  ADD UNIQUE KEY `UNIQ` (`ItemID`,`Tag`,`BookID`),
-  ADD KEY `Table` (`Table`);
+  ADD UNIQUE KEY `UNIQ` (`ItemID`,`Tag`,`BookID`);
 
 --
 -- Indexes for table `transactions`

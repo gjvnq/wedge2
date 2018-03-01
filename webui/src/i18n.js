@@ -65,6 +65,7 @@ export const messages = {
     'Transactions': 'Transações',
     'Unit Value': 'Valor Unitário',
     'Value': 'Valor',
-    'Wrong password :-(': 'Senha errada :-('
+    'Wrong password :-(': 'Senha errada :-(',
+    'You have been logged out. Going back to the login page in 5 seconds...': 'Você foi deslogado. Voltando para a página de login em 5 segundos...'
   }
 }

@@ -95,9 +95,7 @@
       },
       list_books () {
         this.$http.get('books').then(response => {
-          console.log('suc', response)
           this.books = response.body
-          console.log(this.books)
         }, response => {
           console.log('err', response)
         })
@@ -109,7 +107,7 @@
     data () {
       return {
         books: [],
-        selected_book: null,
+        selected_book: this.$http.options.book_id,
         password: '',
         flagHideErr404: true,
         flagHideErrPass: true,

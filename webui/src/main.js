@@ -74,12 +74,30 @@ Vue.http.options.emulateJSON = false
 Vue.http.headers.common['Authorization'] = 'Bearer ' + localStorage.getItem('wedge-Authorization')
 Vue.http.options.book_id = localStorage.getItem('wedge-BookId')
 
+var first401 = false
+
 Vue.http.interceptors.push(function (request, next) {
   request.url = request.url.replace('{book-id}', Vue.http.options.book_id)
-  next()
+  next(function (response) {
+    if (response.status === 401 && first401 === false) {
+      first401 = true
+      TheVue.$notifications.notify(
+        {
+          message: TheVue.$t('You have been logged out. Going back to the login page in 5 seconds...'),
+          icon: 'ti-alert',
+          horizontalAlign: 'center',
+          verticalAlign: 'top',
+          type: 'danger'
+        })
+      setTimeout(function () {
+        TheVue.$router.push('/login')
+        first401 = false
+      }, 5000)
+    }
+  })
 })
 
-new Vue({
+var TheVue = new Vue({
   el: '#app',
   render: h => h(App),
   router,

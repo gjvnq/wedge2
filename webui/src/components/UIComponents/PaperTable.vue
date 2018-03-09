@@ -60,7 +60,7 @@
     },
     methods: {
       hasValue (item, column, index) {
-        return this.itemValue(item, column, index) !== 'undefined'
+        return this.itemValue(item, column, index) !== undefined
       },
       itemValue (item, column, index) {
         if (this.columnsProperties.length !== 0 && typeof index === 'number') {

@@ -33,7 +33,7 @@
     </div>
     <div class="col-md-12">
       <div class="card">
-        <paper-table :title="$t(tblAssets.title)" :sub-title="$t(tblAssets.subTitle)" :data="tblAssetsData" :columns="tblAssets.columns" :columnsStyles="tblAssets.columnsStyles" :click_callback="tblAssets.click_callback">
+        <paper-table :title="$t(tblAssets.title)" :sub-title="$t(tblAssets.subTitle)" :data="tblAssetsData" :columns="tblAssets.columns" :columnsStyles="tblAssets.columnsStyles">
         </paper-table>
       </div>
     </div>
@@ -93,9 +93,6 @@
         tblAssets: {
           title: 'Currencies & Assets',
           subTitle: '',
-          click_callback: function (obj) {
-            console.log('Currency ' + obj.code + ' clicked')
-          },
           columns: [...tableColumns],
           columnsStyles: [...tableColumnsStyle]
         }

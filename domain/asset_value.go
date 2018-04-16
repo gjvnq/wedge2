@@ -3,7 +3,7 @@ package wedge
 import (
 	"time"
 
-	"github.com/satori/go.uuid"
+	uuid "github.com/gjvnq/go.uuid"
 )
 
 type AssetValue struct {

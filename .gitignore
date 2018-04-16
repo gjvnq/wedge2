@@ -3,7 +3,6 @@ dist/*
 server/server
 server/config.json
 webui/node_modules
-webui/build
 server/gin-bin
 
 /target
